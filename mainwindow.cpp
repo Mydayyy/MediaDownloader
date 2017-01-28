@@ -7,11 +7,14 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    // We want all actions be relative to the path where the application was started
     QDir::setCurrent(QCoreApplication::applicationDirPath());
 
+    // Starts downloading all currently added videos and all videos added while still in download mode
     QAction *actionPlay = ui->toolBar->addAction(QIcon(":/toolbar/icons/play.png"), tr("Pause"));
     connect(actionPlay, SIGNAL(triggered(bool)), this, SLOT(actionPlayTriggered(bool)));
 
+    // Unused for now. TODO: Implement
     ui->toolBar->addAction(QIcon(":/toolbar/icons/pause.png"), tr("Pause"));
     ui->toolBar->addAction(QIcon(":/toolbar/icons/stop.png"), tr("Pause"));
 
@@ -29,9 +32,10 @@ MainWindow::~MainWindow()
 void MainWindow::setupTableModel()
 {
     this->tableModel = new TableModel();
-    this->ui->treeTrackView->header()->setSectionResizeMode(QHeaderView::Stretch);
+    this->ui->treeTrackView->header()->setSectionResizeMode(QHeaderView::Stretch); // This will set all rows to equal length
     this->ui->treeTrackView->setModel(this->tableModel);
 
+    // Enable drag and drop
     ui->treeTrackView->setSelectionMode(QAbstractItemView::ExtendedSelection);
     ui->treeTrackView->setDragEnabled(true);
     ui->treeTrackView->viewport()->setAcceptDrops(true);
@@ -40,14 +44,15 @@ void MainWindow::setupTableModel()
     ui->treeTrackView->setDefaultDropAction(Qt::MoveAction);
     ui->treeTrackView->setContextMenuPolicy(Qt::CustomContextMenu);
 
-    connect(ui->treeTrackView, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(tableViewCustomContextMenu(QPoint)));
+    connect(ui->treeTrackView, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(tableViewCustomContextMenu(QPoint))); // Custom Context Menu
 }
 
 void MainWindow::tableViewCustomContextMenu(QPoint pos)
 {
+    // TODO: We ( usually ) want context actions to apply to all selected items, so we need to iterate over them here and apply the action to each of them
     QMenu menu(this);
 
-    QAction *deleteRow = new QAction("Delete", &menu);
+    QAction *deleteRow = new QAction("Delete", &menu); // Deletes an entry
     menu.addAction(deleteRow);
 
     QAction *selectedAction = menu.exec(ui->treeTrackView->viewport()->mapToGlobal(pos));

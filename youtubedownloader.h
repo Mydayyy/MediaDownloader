@@ -46,8 +46,6 @@ public slots:
     void downloadVideoUpdateProgressLast(Link *link, QString maxsize, QString time);
     void downloadVideoFinished(Link *link);
     void downloadWatchdog();
-
-    void dialogClosed();
 };
 
 #endif // YOUTUBEDOWNLOADER_H

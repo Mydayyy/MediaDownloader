@@ -13,6 +13,7 @@
 #include "link.h"
 #include "QDropEvent"
 
+// TODO: Rewrite model to use tree structure
 class TableModel : public QAbstractItemModel
 {
     Q_OBJECT
@@ -29,6 +30,7 @@ public:
     void deleteLink(Link *link);
     void deleteIndexRow(QModelIndex index);
     Link *getUnprocessedLink(const QModelIndex &parent = QModelIndex());
+    Link *getParentLink(Link *link);
 
 public slots:
     void updateLinkProgress(Link *link, QString progress);

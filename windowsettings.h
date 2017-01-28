@@ -30,6 +30,8 @@ private slots:
     void on_buttonCloseSettings_clicked();
     void on_checkboxCreateContainerSubfolder_toggled(bool checked);
 
+    void on_inputSavePath_editingFinished();
+
 private:
     Ui::WindowSettings *ui;
 

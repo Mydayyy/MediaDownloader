@@ -7,7 +7,7 @@ WindowSettings::WindowSettings(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    this->initializeCurrentSettings();
+    this->initializeCurrentSettings(); // Load current settings and apply them to the controls
 
     connect(ui->inputConcurrentDownloads, SIGNAL(valueChanged(int)), this, SLOT(on_spinboxConcurrentDownloadsChanged(int)));
 }
@@ -19,7 +19,7 @@ WindowSettings::~WindowSettings()
 
 void WindowSettings::on_buttonBrowseFiles_clicked()
 {
-    QFileDialog fileBrowser(this, "Choose a download location", SettingsManager::getInstance().get("downloadSavePath", QString("")).toString());
+    QFileDialog fileBrowser(this, "Choose a download location", SettingsManager::getInstance().get("downloadSavePath", DEFAULT_DOWNLOAD_SAVE_PATH);
     fileBrowser.setFileMode(QFileDialog::DirectoryOnly);
     if(fileBrowser.exec() == QDialog::Accepted)
     {
@@ -32,6 +32,10 @@ void WindowSettings::on_buttonBrowseFiles_clicked()
     }
 }
 
+void WindowSettings::on_inputSavePath_editingFinished()
+{
+    SettingsManager::getInstance().set("downloadSavePath", this->ui->inputSavePath->text());
+}
 
 void WindowSettings::on_spinboxConcurrentDownloadsChanged(int newValue)
 {
@@ -54,6 +58,8 @@ void WindowSettings::initializeCurrentSettings()
     ui->inputConcurrentDownloads->setValue(SettingsManager::getInstance().get("concurrentDownloads", DEFAULT_CONCURRENT_DOWNLOADS).toInt());
     ui->checkboxCreateContainerSubfolder->setChecked(SettingsManager::getInstance().get("createContainerSubfolder", QVariant(DEFAULT_CREATE_CONTAINER_SUBFOLDER)).toBool());
 }
+
+
 
 
 

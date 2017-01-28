@@ -7,7 +7,21 @@ TableModel::TableModel()
 
 TableModel::~TableModel()
 {
+    QMap<Link*, QList<Link*>>::iterator i;
+    for(i = this->subItems.begin(); i != this->subItems.end(); ++i)
+    {
+        while(i.value().size() > 0)
+        {
+            delete i.value().takeAt(0);
+        }
+    }
+    this->subItems.clear();
 
+    for(int i = 0; i < this->mLinks.size(); i++)
+    {
+        delete this->mLinks[i];
+    }
+    this->mLinks.clear();
 }
 
 Link::Data TableModel::mapColumnToData(int column)
@@ -118,6 +132,16 @@ Link* TableModel::getUnprocessedLink(const QModelIndex &parent)
                  return this->mLinks[i];
             }
         }
+    }
+    return nullptr;
+}
+
+Link *TableModel::getParentLink(Link *link)
+{
+    QModelIndex index = this->getIndexForLink(link);
+    if(index.parent().isValid())
+    {
+        return static_cast<Link*>(index.parent().internalPointer());
     }
     return nullptr;
 }

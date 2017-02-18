@@ -20,6 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     this->setupTableModel();
     this->youtube = new YoutubeDownloader(this->tableModel);
+    this->clipboard = QApplication::clipboard();
 }
 
 MainWindow::~MainWindow()
@@ -27,6 +28,7 @@ MainWindow::~MainWindow()
     delete ui;
     delete this->youtube;
     delete this->tableModel;
+
 }
 
 void MainWindow::setupTableModel()
@@ -50,21 +52,35 @@ void MainWindow::setupTableModel()
 void MainWindow::tableViewCustomContextMenu(QPoint pos)
 {
     // TODO: We ( usually ) want context actions to apply to all selected items, so we need to iterate over them here and apply the action to each of them
+    if(!ui->treeTrackView->indexAt(pos).isValid())
+    {
+        return;
+    }
+    QModelIndex selectedIndex = ui->treeTrackView->indexAt(pos);
+    Link *link = static_cast<Link*>(selectedIndex.internalPointer());
+
     QMenu menu(this);
 
     QAction *deleteRow = new QAction("Delete", &menu); // Deletes an entry
     menu.addAction(deleteRow);
 
+    QAction *retryLink = new QAction("Retry", &menu);
+    if(link->getData(Link::DATA_IS_FAILED).toBool())
+    {
+        menu.addAction(retryLink);
+    }
+
     QAction *selectedAction = menu.exec(ui->treeTrackView->viewport()->mapToGlobal(pos));
 
-    if(!ui->treeTrackView->indexAt(pos).isValid())
-    {
-        return;
-    }
     if(selectedAction == deleteRow)
     {
-        QModelIndex selectedIndex = ui->treeTrackView->indexAt(pos);
         this->tableModel->deleteIndexRow(selectedIndex);
+        return;
+    }
+    if(selectedAction == retryLink)
+    {
+        link->setData(Link::DATA_IS_FAILED, QVariant(false));
+        link->setData(Link::DATA_IS_STARTED, QVariant(false));
         return;
     }
 }
@@ -91,4 +107,37 @@ void MainWindow::on_actionSettings_triggered()
 void MainWindow::actionPlayTriggered(bool checked)
 {
     this->youtube->startDownload();
+}
+
+void MainWindow::on_actionClipboard_Watchdog_toggled(bool checked)
+{
+    if(checked)
+    {
+        connect(this->clipboard, SIGNAL(dataChanged()), this, SLOT(onClipboardChanged()));
+    } else
+    {
+        disconnect(this->clipboard, SIGNAL(dataChanged()), this, SLOT(onClipboardChanged()));
+    }
+}
+
+void MainWindow::onClipboardChanged()
+{
+    QStringList formats = this->clipboard->mimeData(QClipboard::Clipboard)->formats();
+    QString text;
+    if(formats.contains("text/html") || formats.contains("text/plain"))
+    {
+        QString type = formats.contains("text/html")?"text/html":"text/plain";
+        text = QString(this->clipboard->mimeData(QClipboard::Clipboard)->data(type));
+        if(this->lastClipboard == text)
+        {
+            return;
+        }
+        this->lastClipboard = text;
+        this->youtube->clipboardChanged(text);
+    }
+}
+
+void MainWindow::on_actionAnalyse_clipboard_for_links_triggered()
+{
+    this->onClipboardChanged();
 }

@@ -14,7 +14,8 @@ public:
         DATA_PROGRESS,
         DATA_IS_STARTED,
         DATA_IS_FINISHED,
-        DATA_IS_CONTAINER
+        DATA_IS_CONTAINER,
+        DATA_IS_FAILED
     };
 
     Link(QString title, QString link, QString progress);
@@ -30,6 +31,7 @@ private:
     QString mProgress;
     bool mIsStarted;
     bool mIsFinished;
+    bool mIsFailed;
     bool mIsContainer;
 };
 

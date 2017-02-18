@@ -10,7 +10,10 @@
 #include <QAction>
 #include <QAction>
 #include <QDir>
+#include <QStringList>
+#include <QClipboard>
 
+#include "link.h"
 #include "tablemodel.h"
 #include "youtubedownloader.h"
 #include "windowsettings.h"
@@ -31,6 +34,8 @@ private:
     Ui::MainWindow *ui;
     TableModel *tableModel;
     YoutubeDownloader *youtube;
+    QClipboard *clipboard;
+    QString lastClipboard;
 
     void setupTableModel();
 
@@ -42,6 +47,9 @@ private slots:
     void on_buttonAddTrack_clicked();
     void on_actionSettings_triggered();
 
+    void on_actionClipboard_Watchdog_toggled(bool checked);
+    void onClipboardChanged();
+    void on_actionAnalyse_clipboard_for_links_triggered();
 };
 
 #endif // MAINWINDOW_H

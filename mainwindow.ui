@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>852</width>
-    <height>583</height>
+    <height>638</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,7 +20,7 @@
       <item>
        <widget class="QLineEdit" name="inputUrl">
         <property name="text">
-         <string>https://www.youtube.com/watch?v=HQzu7NYlZNQ</string>
+         <string>https://www.youtube.com/user/girlsday5</string>
         </property>
        </widget>
       </item>
@@ -32,6 +32,9 @@
        </widget>
       </item>
      </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_2"/>
     </item>
     <item>
      <layout class="QGridLayout" name="gridLayout">
@@ -62,6 +65,7 @@
      <string>Optio&amp;ns</string>
     </property>
     <addaction name="actionSettings"/>
+    <addaction name="actionClipboard_Watchdog"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuOptions"/>
@@ -86,6 +90,14 @@
   <action name="actionSettings">
    <property name="text">
     <string>S&amp;ettings</string>
+   </property>
+  </action>
+  <action name="actionClipboard_Watchdog">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Clipboard Watchdog</string>
    </property>
   </action>
  </widget>

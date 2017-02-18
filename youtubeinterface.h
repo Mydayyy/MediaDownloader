@@ -43,7 +43,8 @@ class YoutubeInterface : public QObject
     Q_OBJECT
 public:
     YoutubeInterface();
-    void extractVideoInformation(QString url);
+    void extractVideoInformation(QString url, bool messageBoxForErrors = true);
+
     void downloadVideo(Link *link, QString containerTitle = "");
     void resetDownloadSession();
 
@@ -61,7 +62,7 @@ private:
 signals:
     // Extract Video Information
     void extractedVideoInformation(QList<Link*>, QString playlistTitle);
-    void extractedVideoInformationFailed(QString stderr);
+    void extractedVideoInformationFailed(QString stderr, bool reportError);
 
     // Download Video
     void downloadVideoFailed(Link *link, QString error);
@@ -83,7 +84,9 @@ public slots:
     void resumeDownloadsAfterDialog();
 
     // QProcess Video Extraction Slots
-    void videoExtractionProcessEnd(int exitCode);
+    void videoExtractionProcessEnd(int exitCode, Process *process, bool reportErrors = true);
+    void videoExtractionProcessFinishedReportErrors(int exitCode);
+    void videoExtractionProcessFinishedNoErrors(int exitCode);
     void videoExtractionProcessErrorOccured(QProcess::ProcessError error);
 };
 

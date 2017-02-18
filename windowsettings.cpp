@@ -17,9 +17,10 @@ WindowSettings::~WindowSettings()
     delete ui;
 }
 
+// Filebrowsedialog which will be opened when the user clicks browse to select his downloadpath
 void WindowSettings::on_buttonBrowseFiles_clicked()
 {
-    QFileDialog fileBrowser(this, "Choose a download location", SettingsManager::getInstance().get("downloadSavePath", DEFAULT_DOWNLOAD_SAVE_PATH);
+    QFileDialog fileBrowser(this, "Choose a download location", SettingsManager::getInstance().get("downloadSavePath", DEFAULT_DOWNLOAD_SAVE_PATH).toString());
     fileBrowser.setFileMode(QFileDialog::DirectoryOnly);
     if(fileBrowser.exec() == QDialog::Accepted)
     {
@@ -32,6 +33,7 @@ void WindowSettings::on_buttonBrowseFiles_clicked()
     }
 }
 
+// Also we need to watch whether the user just enters a path by himself and write it to the config
 void WindowSettings::on_inputSavePath_editingFinished()
 {
     SettingsManager::getInstance().set("downloadSavePath", this->ui->inputSavePath->text());

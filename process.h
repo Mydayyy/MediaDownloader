@@ -2,6 +2,8 @@
 #define PROCESS_H
 #include <QProcess>
 #include "link.h"
+
+
 class Process : public QProcess
 {
 public:

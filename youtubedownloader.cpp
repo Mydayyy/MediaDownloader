@@ -9,7 +9,7 @@ YoutubeDownloader::YoutubeDownloader(TableModel *tableModel, QObject *parent)
     // Video Information Extraction
     connect(this->ytd, SIGNAL(extractedVideoInformation(QList<Link*>,QString)),
             this, SLOT(extractedLinkInformation(QList<Link*>,QString)));
-    connect(this->ytd, SIGNAL(extractedVideoInformationFailed(QString)), this, SLOT(extractLinkInformationFailed(QString)));
+    connect(this->ytd, SIGNAL(extractedVideoInformationFailed(QString, bool)), this, SLOT(extractLinkInformationFailed(QString)));
 
     // Video Download Extraction
     connect(this->ytd, SIGNAL(downloadVideoFailed(Link*,QString)), this, SLOT(downloadVideoFailed(Link*,QString)));
@@ -49,10 +49,29 @@ void YoutubeDownloader::startDownload()
 
 
 
-void YoutubeDownloader::extractLinkInformation(QString url)
+void YoutubeDownloader::extractLinkInformation(QString url, bool reportErrors)
 {
     this->pendingExtractionProcesses++;
-    this->ytd->extractVideoInformation(url); // Will report success / error via connected slot
+    this->ytd->extractVideoInformation(url, reportErrors); // Will report success / error via connected slot
+}
+
+void YoutubeDownloader::clipboardChanged(QString newText)
+{
+    // Taken from https://mathiasbynens.be/demo/url-regex
+    QString UrlRegex = "(?:(?:https?|ftp):\\/\\/)(?:\\S+(?::\\S*)?@)?(?:(?!10(?:\\.\\d{1,3}){3})(?!127(?:\\.\\d{1,3}){3})(?!169\\.254(?:\\.\\d{1,3}){2})(?!192\\.168(?:\\.\\d{1,3}){2})(?!172\\.(?:1[6-9]|2\\d|3[0-1])(?:\\.\\d{1,3}){2})(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}(?:\\.(?:[1-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))|(?:(?:[a-z\\x{00a1}-\\x{ffff}0-9]+-?)*[a-z\\x{00a1}-\\x{ffff}0-9]+)(?:\\.(?:[a-z\\x{00a1}-\\x{ffff}0-9]+-?)*[a-z\\x{00a1}-\\x{ffff}0-9]+)*(?:\\.(?:[a-z\\x{00a1}-\\x{ffff}]{2,})))(?::\\d{2,5})?(?:\\/[^\\s]*)?";
+    QRegularExpression exp(UrlRegex);
+    QRegularExpressionMatchIterator i = exp.globalMatch(newText);
+    while(i.hasNext())
+    {
+        QRegularExpressionMatch urlMatch = i.next();
+        QString url = urlMatch.captured(0);
+        QRegularExpression regex("[!\"\\\\]");
+        while(regex.match(url).hasMatch())
+        {
+            url.chop(1);
+        }
+        this->extractLinkInformation(url, false);
+    }
 }
 
 void YoutubeDownloader::extractedLinkInformation(QList<Link *> videos, QString playlistTitle)
@@ -84,9 +103,13 @@ void YoutubeDownloader::extractedLinkInformation(QList<Link *> videos, QString p
     }
 }
 
-void YoutubeDownloader::extractLinkInformationFailed(QString stderr)
+void YoutubeDownloader::extractLinkInformationFailed(QString stderr, bool reportError)
 {
     this->pendingExtractionProcesses--;
+    if(!reportError)
+    {
+        return;
+    }
     QMessageBox mb("Error",
                    QString(stderr),
                    QMessageBox::Critical, QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
@@ -151,6 +174,7 @@ void YoutubeDownloader::downloadVideoFailed(Link *link, QString error)
                    QMessageBox::Critical, QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
     mb.exec();
     this->tableModel->updateLinkProgress(link, "Failed");
+    link->setData(Link::DATA_IS_FAILED, QVariant(true));
 }
 
 void YoutubeDownloader::downloadVideoSkipped(Link *link)

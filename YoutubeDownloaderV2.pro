@@ -27,7 +27,6 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     tablemodel.cpp \
     link.cpp \
-    treeview.cpp \
     youtubedownloader.cpp \
     youtubeinterface.cpp \
     settingsmanager.cpp \
@@ -37,7 +36,6 @@ SOURCES += main.cpp\
 HEADERS  += mainwindow.h \
     tablemodel.h \
     link.h \
-    treeview.h \
     youtubedownloader.h \
     youtubeinterface.h \
     settingsmanager.h \

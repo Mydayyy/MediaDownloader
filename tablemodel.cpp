@@ -77,7 +77,7 @@ Link *TableModel::addLink(Link *link, Link *parent)
         }
         int index = this->mLinks.indexOf(parent);
         this->subItems[parent];
-        beginInsertRows(this->index(index, 0, createIndex(index, 0, this->mLinks[index])), this->subItems[parent].size(), this->subItems[parent].size());
+        beginInsertRows(this->index(index, 0, QModelIndex()), this->subItems[parent].size(), this->subItems[parent].size());
         this->subItems[parent].append(link);
         endInsertRows();
     }

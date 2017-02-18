@@ -5,6 +5,9 @@
 #include <QDebug>
 #include <QTimer>
 #include <QMessageBox>
+#include <QRegularExpression>
+#include <QRegularExpressionMatch>
+#include <QRegularExpressionMatchIterator>
 #include "constants.h"
 #include "tablemodel.h"
 #include "youtubeinterface.h"
@@ -19,7 +22,7 @@ public:
 
     void addLink(QString url);
     void startDownload();
-    void extractLinkInformation(QString url);
+    void extractLinkInformation(QString url, bool reportErrors = true);
 
 private:
     TableModel *tableModel;
@@ -29,13 +32,18 @@ private:
     int pendingDownloadProcesses = 0;
     bool isDownloading = false;
     QTimer timerDownloadWatchdog;
+    
 signals:
     void startedOperating();
     void stoppedOperating();
 
 public slots:
+    // CLIPBOARD CHANGED
+    void clipboardChanged(QString newText);
+
+    // INFORMATION EXTRACTION
     void extractedLinkInformation(QList<Link*> videos, QString playlistTitle);
-    void extractLinkInformationFailed(QString stderr);
+    void extractLinkInformationFailed(QString stderr, bool reportError = false);
 
     // DOWNLOADING
     void downloadNext();

@@ -57,7 +57,7 @@ private:
     OverwriteBehaviour overwriteBehaviour = OverwriteBehaviour::NONE;
 
     QMap<Link*, DownloadData> runningDownloads;
-    // Used to resume downloads which were aborted due to the dialog being open
+    // Used to resume downloads which were aborted due to the dialog being opened
     QList<Link*> downloadsToResume;
 signals:
     // Extract Video Information

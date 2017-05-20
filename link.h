@@ -19,6 +19,7 @@ public:
     };
 
     Link(QString title, QString link, QString progress);
+    Link(const Link &other) = default;
 
     QVariant getData(Link::Data data);
     void setData(Link::Data data, QVariant value);

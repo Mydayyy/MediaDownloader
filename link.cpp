@@ -6,8 +6,8 @@ Link::Link(QString title, QString link, QString progress = "") :
     mProgress(progress),
     mIsStarted(false),
     mIsFinished(false),
-    mIsContainer(false),
-    mIsFailed(false)
+    mIsFailed(false),
+    mIsContainer(false)
 {
 
 }

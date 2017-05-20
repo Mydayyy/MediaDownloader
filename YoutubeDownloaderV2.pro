@@ -31,7 +31,8 @@ SOURCES += main.cpp\
     youtubeinterface.cpp \
     settingsmanager.cpp \
     windowsettings.cpp \
-    process.cpp
+    process.cpp \
+    treenode.cpp
 
 HEADERS  += mainwindow.h \
     tablemodel.h \
@@ -41,7 +42,8 @@ HEADERS  += mainwindow.h \
     settingsmanager.h \
     windowsettings.h \
     constants.h \
-    process.h
+    process.h \
+    treenode.h
 
 FORMS    += mainwindow.ui \
     windowsettings.ui

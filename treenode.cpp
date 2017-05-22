@@ -31,16 +31,18 @@ TreeNode::~TreeNode()
 void TreeNode::appendChildNode(TreeNode *child)
 {
     childNodes.append(child);
+    child->setParentNode(this);
 }
 
 void TreeNode::insertChildNode(TreeNode *child, int row)
 {
     if(row == -1)
     {
-        childNodes.append(child);
+        appendChildNode(child);
         return;
     }
     childNodes.insert(row, child);
+    child->setParentNode(this);
 }
 
 void TreeNode::deleteChildNode(int row)
@@ -53,6 +55,7 @@ void TreeNode::deleteChildNode(int row)
 void TreeNode::removeChildNode(int row)
 {
     TreeNode *toRemove = this->getChildNode(row);
+    toRemove->setParentNode(nullptr);
     this->childNodes.removeAt(row);
 }
 
@@ -103,4 +106,9 @@ int TreeNode::columnCount()
 TreeNode *TreeNode::getParentNode()
 {
     return this->parentNode;
+}
+
+void TreeNode::setParentNode(TreeNode *parent)
+{
+    this->parentNode = parent;
 }

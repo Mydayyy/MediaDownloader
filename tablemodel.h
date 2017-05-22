@@ -35,15 +35,17 @@ public:
 
     bool moveRows(const QModelIndex &sourceParent, int sourceRow, int count, const QModelIndex &destinationParent, int destinationRow);
 
+    void convertToContainer(const QModelIndex &index);
+
     // Helper functions to easily retrieve data
     QModelIndex getIndexForLink(Link *link, int column, TreeNode *currentNode = nullptr) const;
     QModelIndex getIndexForTreeNode(TreeNode *treeNode, int column, TreeNode *currentNode = nullptr) const;
 
     // STUBS
-    Link *getUnprocessedLink();
+    Link *getUnprocessedLink(TreeNode *currentNode = nullptr);
     Link *getParentLink(Link *link);
     void updateLinkProgress(Link *link, QString progress);
-    void refreshName(Link *link);
+    void refreshName(Link *link, QString name = "");
 
 
     // The following functions are required to be implemented and belong to the table model

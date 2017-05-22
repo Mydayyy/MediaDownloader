@@ -28,6 +28,7 @@ struct TreeNode {
     QVariant data(int column);
 
     TreeNode *getParentNode();
+    void setParentNode(TreeNode *parent);
 
 private:
     Link *link;

@@ -2,21 +2,13 @@
 
 TableModel::TableModel()
 {
-    rootNode = new TreeNode();
+    rootNode = new TreeNode(new Link("", "" ,""));
+    rootNode->getLink()->setData(Link::DATA_IS_CONTAINER, QVariant(true));
 }
 
 TableModel::~TableModel()
 {
     delete rootNode;
-}
-
-Link::Data TableModel::mapColumnToData(int column)
-{
-    switch (column) {
-    case 0: return Link::DATA_TITLE;
-    case 1: return Link::DATA_PROGRESS;
-    }
-    return Link::DATA_INVALID;
 }
 
 int TableModel::mapDataToColumn(Link::Data data)
@@ -26,6 +18,15 @@ int TableModel::mapDataToColumn(Link::Data data)
     case Link::DATA_PROGRESS: return 1;
     default: return 0;
     }
+}
+
+Link::Data TableModel::mapColumnToData(int column)
+{
+    switch (column) {
+    case 0: return Link::DATA_TITLE;
+    case 1: return Link::DATA_PROGRESS;
+    }
+    return Link::DATA_INVALID;
 }
 
 Link *TableModel::addLink(QString link, Link *parent)
@@ -44,19 +45,100 @@ Link *TableModel::addLink(Link *link, Link *parent)
         endInsertRows();
         return link;
     }
+
+    convertToContainer(parentIndex);
+
     TreeNode *parentNode = (TreeNode*) parentIndex.internalPointer();
-    if(!parentNode->getLink()->getData(Link::Data::DATA_IS_CONTAINER).toBool())
-    {
-        Link *newLink = new Link(*(parentNode->getLink()));
-        parentNode->getLink()->setData(Link::DATA_IS_CONTAINER, QVariant(true));
-        beginInsertRows(parentIndex, parentNode->getChildNodeCount(), parentNode->getChildNodeCount());
-        parentNode->appendChildNode(new TreeNode(newLink, parentNode));
-        endInsertRows();
-    }
     beginInsertRows(parentIndex, parentNode->getChildNodeCount(), parentNode->getChildNodeCount());
     parentNode->appendChildNode(new TreeNode(link, parentNode));
     endInsertRows();
     return link;
+}
+
+void TableModel::deleteIndex(QModelIndex index)
+{
+    myRemoveRows(index.row(), 1, index.parent());
+}
+
+bool TableModel::myRemoveRows(int row, int count, const QModelIndex &parent)
+{
+    beginRemoveRows(parent, row, row+count-1);
+
+    TreeNode *parentNode = (TreeNode*) parent.internalPointer();
+    if(!parent.isValid())
+    {
+        parentNode = this->rootNode;
+    }
+    while(count > 0)
+    {
+        parentNode->deleteChildNode(row);
+        count--;
+    }
+
+    endRemoveRows();
+    return true;
+}
+
+bool TableModel::moveRows(const QModelIndex &sourceParent, int sourceRow, int count, const QModelIndex &destinationParent, int destinationRow)
+{
+    TreeNode *sourceParentNode = rootNode;
+    if(sourceParent.isValid())
+    {
+       sourceParentNode = (TreeNode*) sourceParent.internalPointer();
+    }
+
+    TreeNode *destinationParentNode = rootNode;
+    if(destinationParent.isValid())
+    {
+        destinationParentNode = (TreeNode*) destinationParent.internalPointer();
+    }
+
+    if(count <= 0)
+    {
+        return false;
+    }
+
+
+    convertToContainer(destinationParent);
+
+    int finalDestinationRow = destinationRow==-1?destinationParentNode->getChildNodeCount():destinationRow;
+    if(sourceParent == destinationParent && finalDestinationRow >= sourceRow && finalDestinationRow <= sourceRow+count)
+    {
+        return false;
+    }
+    beginMoveRows(sourceParent, sourceRow, sourceRow+count-1, destinationParent, finalDestinationRow);
+    if(sourceParentNode == destinationParentNode && finalDestinationRow > sourceRow)
+    {
+        finalDestinationRow -= count;
+    }
+    for(int i = 0; i < count; i++)
+    {
+        TreeNode *movingRow = sourceParentNode->getChildNode(sourceRow);
+        sourceParentNode->removeChildNode(sourceRow);
+        destinationParentNode->insertChildNode(movingRow, finalDestinationRow);
+    }
+    endMoveRows();
+}
+
+void TableModel::convertToContainer(const QModelIndex &index)
+{
+    TreeNode *indexNode = (TreeNode*) index.internalPointer();
+    if(!index.isValid())
+    {
+        indexNode = this->rootNode;
+    }
+
+    if(!indexNode->getLink()->getData(Link::Data::DATA_IS_CONTAINER).toBool())
+    {
+        Link *newLink = new Link(*(indexNode->getLink()));
+        indexNode->getLink()->setData(Link::DATA_IS_CONTAINER, QVariant(true));
+        updateLinkProgress(indexNode, "");
+        refreshName(indexNode, "Container");
+        indexNode->getLink()->setData(Link::DATA_IS_CONTAINER, QVariant(true));
+        beginInsertRows(index, indexNode->getChildNodeCount(), indexNode->getChildNodeCount());
+        indexNode->appendChildNode(new TreeNode(newLink, indexNode));
+        endInsertRows();
+    }
 }
 
 QModelIndex TableModel::getIndexForLink(Link *link, int column, TreeNode *currentNode) const
@@ -113,93 +195,52 @@ QModelIndex TableModel::getIndexForTreeNode(TreeNode *treeNode, int column, Tree
     return QModelIndex();
 }
 
-void TableModel::deleteIndex(QModelIndex index)
+Link *TableModel::getUnprocessedLink(TreeNode *currentNode)
 {
-    if(!index.isValid())
+    if(currentNode == nullptr)
     {
-        return;
+       currentNode = this->rootNode;
     }
-    this->myRemoveRows(index.row(), 1, index.parent());
-}
-
-bool TableModel::myRemoveRows(int row, int count, const QModelIndex &parent)
-{
-    beginRemoveRows(parent, row, row+count-1);
-    TreeNode *parentNode;// = (TreeNode*) parent.internalPointer();
-    if(parent.isValid())
+    if(currentNode != this->rootNode)
     {
-        parentNode = (TreeNode*) parent.internalPointer();
+        if(!currentNode->getLink()->getData(Link::DATA_IS_STARTED).toBool() && currentNode->getLink()->getData(Link::DATA_IS_CONTAINER).toBool() == false)
+        {
+            return currentNode->getLink();
+        }
     }
-    else
+    for(int i = 0; i < currentNode->getChildNodeCount(); i++)
     {
-        parentNode = rootNode;
+        TreeNode *nextNode = currentNode->getChildNodes().value(i);
+        Link *link = this->getUnprocessedLink(nextNode);
+        if(link && !link->getData(Link::DATA_IS_STARTED).toBool() && link->getData(Link::DATA_IS_CONTAINER).toBool() == false)
+        {
+            return link;
+        }
     }
-    while(count > 0)
-    {
-        parentNode->deleteChildNode(row);
-        count--;
-    }
-
-    this->endRemoveRows();
-    return true;
-}
-
-bool TableModel::moveRows(const QModelIndex &sourceParent, int sourceRow, int count, const QModelIndex &destinationParent, int destinationRow)
-{
-    qDebug() << sourceRow;
-    if(count <= 0)
-    {
-        return false;
-    }
-    TreeNode *sourceParentNode = nullptr;
-    if(!sourceParent.isValid())
-    {
-        sourceParentNode = this->rootNode;
-    }
-    else
-    {
-        sourceParentNode = (TreeNode*) sourceParent.internalPointer();
-    }
-
-    TreeNode *destinationParentNode = nullptr;
-    if(!destinationParent.isValid())
-    {
-        destinationParentNode = this->rootNode;
-    }
-    else
-    {
-        destinationParentNode = (TreeNode*) destinationParent.internalPointer();
-    }
-
-    beginMoveRows(sourceParent, sourceRow, sourceRow+count-1, destinationParent, destinationRow);
-    for(int i = count; i > 0; i--)
-    {
-        TreeNode *item = sourceParentNode->getChildNode(sourceRow);
-        sourceParentNode->removeChildNode(sourceRow);
-        destinationParentNode->insertChildNode(item, destinationRow);
-    }
-    endMoveRows();
-    return true;
-}
-
-Link *TableModel::getUnprocessedLink()
-{
-    return new Link("", "", "");
+    return nullptr;
 }
 
 Link *TableModel::getParentLink(Link *link)
 {
-    return new Link("", "", "");
+    TreeNode *linkNode = (TreeNode*) getIndexForLink(link, 0).internalPointer();
+    return linkNode->getParentNode()->getLink();
 }
 
 void TableModel::updateLinkProgress(Link *link, QString progress)
 {
-
+    link->setData(Link::DATA_PROGRESS, progress);
+    emit dataChanged(this->getIndexForLink(link, this->mapDataToColumn(Link::DATA_PROGRESS)),
+                     this->getIndexForLink(link, this->mapDataToColumn(Link::DATA_PROGRESS)));
 }
 
-void TableModel::refreshName(Link *link)
+void TableModel::refreshName(Link *link, QString name)
 {
-
+    if(!name.isEmpty())
+    {
+        link->setData(Link::DATA_TITLE, QVariant(name));
+    }
+    emit dataChanged(this->getIndexForLink(link, this->mapDataToColumn(Link::DATA_TITLE)),
+                     this->getIndexForLink(link, this->mapDataToColumn(Link::DATA_TITLE)));
 }
 
 QModelIndex TableModel::index(int row, int column, const QModelIndex &parent) const
@@ -209,23 +250,13 @@ QModelIndex TableModel::index(int row, int column, const QModelIndex &parent) co
         return QModelIndex();
     }
 
-    TreeNode *parentNode;
-
     if(!parent.isValid())
     {
-        parentNode = rootNode;
-    }
-    else
-    {
-        parentNode = (TreeNode*) parent.internalPointer();
+        return createIndex(row, column, this->rootNode->getChildNode(row));
     }
 
-    TreeNode *childItem = parentNode->getChildNode(row);
-    if(childItem)
-    {
-        return createIndex(row, column, childItem);
-    }
-    return QModelIndex();
+    TreeNode *parentNode = (TreeNode*) parent.internalPointer();
+    return createIndex(row, column, parentNode->getChildNode(row));
 }
 
 QModelIndex TableModel::parent(const QModelIndex &index) const
@@ -234,60 +265,41 @@ QModelIndex TableModel::parent(const QModelIndex &index) const
     {
         return QModelIndex();
     }
-
-    TreeNode *childNode = (TreeNode*) index.internalPointer();
-    TreeNode *parentNode = (TreeNode*) childNode->getParentNode();
-
-    if(parentNode == rootNode)
+    TreeNode *indexNode = (TreeNode*) index.internalPointer();
+    if(indexNode->getParentNode() == this->rootNode)
     {
         return QModelIndex();
     }
-
-    return createIndex(parentNode->row(), 0, parentNode);
+    return createIndex(indexNode->getParentNode()->row(), 0, indexNode->getParentNode());
 }
 
 int TableModel::rowCount(const QModelIndex &parent) const
 {
-    TreeNode *parentNode;
     if(parent.column() > 0)
     {
         return 0;
     }
     if(!parent.isValid())
     {
-        parentNode = rootNode;
+        return this->rootNode->getChildNodeCount();
     }
-    else
-    {
-        parentNode = (TreeNode*) parent.internalPointer();
-    }
-
+    TreeNode *parentNode = (TreeNode*) parent.internalPointer();
     return parentNode->getChildNodeCount();
 }
 
 int TableModel::columnCount(const QModelIndex &parent) const
 {
-    if(parent.isValid())
-    {
-        return ((TreeNode*) parent.internalPointer())->columnCount();
-    }
-    return rootNode->columnCount();
+    return Link::DISPLAY_MAX_PROPERTIES;
 }
 
 QVariant TableModel::data(const QModelIndex &index, int role) const
 {
-    if(!index.isValid())
+    if(role != Qt::DisplayRole && role != Qt::UserRole)
     {
         return QVariant();
     }
-
-    if(role != Qt::DisplayRole)
-    {
-        return QVariant();
-    }
-
-    TreeNode *item = (TreeNode*) index.internalPointer();
-    return item->data(index.column());
+    TreeNode *indexNode = (TreeNode*) index.internalPointer();
+    return indexNode->getLink()->getData(mapColumnToData(index.column()));
 }
 
 Qt::ItemFlags TableModel::flags(const QModelIndex &index) const
@@ -324,8 +336,6 @@ bool TableModel::dropMimeData(const QMimeData *data, Qt::DropAction action, int 
 {
     QByteArray encoded = data->data("application/x-qabstractitemmodeldatalist");
     QDataStream stream(&encoded, QIODevice::ReadOnly);
-    QList<TreeNode*> alreadyMoved;
-    QModelIndex dropToParent = parent;
     TreeNode *lastTreeNode = nullptr;
 
     while(!stream.atEnd())
@@ -333,16 +343,22 @@ bool TableModel::dropMimeData(const QMimeData *data, Qt::DropAction action, int 
         int sourceRow, sourceCol;
         quintptr encodedTreeNode;
         stream >> sourceRow >> sourceCol >> encodedTreeNode;
+        TreeNode *treeNode = (TreeNode*) encodedTreeNode;
         if(sourceCol > 0)
         {
             continue;
         }
-        TreeNode *treeNode = (TreeNode*) encodedTreeNode;
-        TreeNode *parentNode = treeNode->getParentNode();
-
-        moveRows(getIndexForTreeNode(parentNode, 0), sourceRow, 1, dropToParent, row);
+        qDebug() << "LinkTitle: " << treeNode->getLink()->getData(Link::DATA_TITLE) << "SouceRow: " << treeNode->row() << "targetRow: " << row;
+        int finalRow = row;
+        if(lastTreeNode)
+        {
+            finalRow = lastTreeNode->row() + 1;
+        }
+        moveRows(getIndexForTreeNode(treeNode->getParentNode(), 0), treeNode->row(), 1, parent, finalRow);
+        lastTreeNode = treeNode;
     }
     return true;
 }
+
 
 

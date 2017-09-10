@@ -132,8 +132,8 @@ void TableModel::convertToContainer(const QModelIndex &index)
     {
         Link *newLink = new Link(*(indexNode->getLink()));
         indexNode->getLink()->setData(Link::DATA_IS_CONTAINER, QVariant(true));
-        updateLinkProgress(indexNode, "");
-        refreshName(indexNode, "Container");
+        updateLinkProgress(indexNode->getLink(), "");
+        refreshName(indexNode->getLink(), "Container");
         indexNode->getLink()->setData(Link::DATA_IS_CONTAINER, QVariant(true));
         beginInsertRows(index, indexNode->getChildNodeCount(), indexNode->getChildNodeCount());
         indexNode->appendChildNode(new TreeNode(newLink, indexNode));
@@ -348,7 +348,7 @@ bool TableModel::dropMimeData(const QMimeData *data, Qt::DropAction action, int 
         {
             continue;
         }
-        qDebug() << "LinkTitle: " << treeNode->getLink()->getData(Link::DATA_TITLE) << "SouceRow: " << treeNode->row() << "targetRow: " << row;
+        //qDebug() << "LinkTitle: " << treeNode->getLink()->getData(Link::DATA_TITLE) << "SouceRow: " << treeNode->row() << "targetRow: " << row;
         int finalRow = row;
         if(lastTreeNode)
         {

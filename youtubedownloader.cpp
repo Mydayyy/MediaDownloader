@@ -139,6 +139,7 @@ void YoutubeDownloader::downloadNext()
             return;
         }
         // When we already have all download slots busy, we return here
+        // We might want to consider checking this at the start of this function. No clue why it is here.
         if(this->pendingDownloadProcesses >= SettingsManager::getInstance().get("concurrentDownloads", DEFAULT_CONCURRENT_DOWNLOADS).toInt())
         {
             return;

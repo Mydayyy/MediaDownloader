@@ -20,7 +20,7 @@
       <item>
        <widget class="QLineEdit" name="inputUrl">
         <property name="text">
-         <string>https://www.youtube.com/user/girlsday5</string>
+         <string/>
         </property>
        </widget>
       </item>
@@ -51,7 +51,7 @@
      <x>0</x>
      <y>0</y>
      <width>852</width>
-     <height>32</height>
+     <height>34</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

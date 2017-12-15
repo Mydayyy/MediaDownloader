@@ -4,7 +4,7 @@
 #include <QString>
 #include <QVariant>
 
-class Link
+class MediaObject
 {
 public:
     enum Data {
@@ -18,11 +18,11 @@ public:
         DATA_IS_FAILED
     };
 
-    Link(QString title, QString link, QString progress);
-    Link(const Link &other) = default;
+    MediaObject(QString title, QString link, QString progress);
+    MediaObject(const MediaObject &other) = default;
 
-    QVariant getData(Link::Data data);
-    void setData(Link::Data data, QVariant value);
+    QVariant getData(MediaObject::Data data);
+    void setData(MediaObject::Data data, QVariant value);
 
     static const int DISPLAY_MAX_PROPERTIES = 2;
 

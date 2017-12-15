@@ -2,12 +2,12 @@
 #define TREENODE_H
 
 #include <QList>
-#include "link.h"
+#include "mediaobject.h"
 
 struct TreeNode {
     TreeNode();
-    TreeNode(Link *link);
-    TreeNode(Link *link, TreeNode *parentNode);
+    TreeNode(MediaObject *link);
+    TreeNode(MediaObject *link, TreeNode *parentNode);
     ~TreeNode();
 
     void appendChildNode(TreeNode *child);
@@ -22,8 +22,8 @@ struct TreeNode {
     int row();
     int columnCount();
 
-    void setLink(Link *newLink);
-    Link *getLink();
+    void setLink(MediaObject *newLink);
+    MediaObject *getLink();
 
     QVariant data(int column);
 
@@ -31,7 +31,7 @@ struct TreeNode {
     void setParentNode(TreeNode *parent);
 
 private:
-    Link *link;
+    MediaObject *link;
     TreeNode *parentNode;
     QList<TreeNode*> childNodes;
 };

@@ -11,12 +11,12 @@ MainWindow::MainWindow(QWidget *parent) :
     QDir::setCurrent(QCoreApplication::applicationDirPath());
 
     // Starts downloading all currently added videos and all videos added while still in download mode
-    QAction *actionPlay = ui->toolBar->addAction(QIcon(":/toolbar/icons/play.png"), tr("Pause"));
+    QAction *actionPlay = ui->toolBar->addAction(QIcon(":/toolbar/icons/play.png"), tr("Play"));
     connect(actionPlay, SIGNAL(triggered(bool)), this, SLOT(actionPlayTriggered(bool)));
 
     // Unused for now. TODO: Implement
     ui->toolBar->addAction(QIcon(":/toolbar/icons/pause.png"), tr("Pause"));
-    ui->toolBar->addAction(QIcon(":/toolbar/icons/stop.png"), tr("Pause"));
+    ui->toolBar->addAction(QIcon(":/toolbar/icons/stop.png"), tr("Stop"));
 
     this->setupTableModel();
     this->youtube = new YoutubeDownloader(this->tableModel);
@@ -69,7 +69,7 @@ void MainWindow::tableViewCustomContextMenu(QPoint pos)
         return;
     }
     QModelIndex selectedIndex = ui->treeTrackView->indexAt(pos);
-    Link *link = static_cast<Link*>(selectedIndex.internalPointer());
+    MediaObject *link = static_cast<MediaObject*>(selectedIndex.internalPointer());
 
     QMenu menu(this);
 
@@ -77,7 +77,7 @@ void MainWindow::tableViewCustomContextMenu(QPoint pos)
     menu.addAction(deleteRow);
 
     QAction *retryLink = new QAction("Retry", &menu);
-    if(link->getData(Link::DATA_IS_FAILED).toBool())
+    if(link->getData(MediaObject::DATA_IS_FAILED).toBool())
     {
         menu.addAction(retryLink);
     }
@@ -91,8 +91,8 @@ void MainWindow::tableViewCustomContextMenu(QPoint pos)
     }
     if(selectedAction == retryLink)
     {
-        link->setData(Link::DATA_IS_FAILED, QVariant(false));
-        link->setData(Link::DATA_IS_STARTED, QVariant(false));
+        link->setData(MediaObject::DATA_IS_FAILED, QVariant(false));
+        link->setData(MediaObject::DATA_IS_STARTED, QVariant(false));
         return;
     }
 }

@@ -9,12 +9,12 @@ Process::~Process()
 
 }
 
-void Process::setLink(Link *link)
+void Process::setLink(MediaObject *link)
 {
     this->link = link;
 }
 
-Link *Process::getLink()
+MediaObject *Process::getLink()
 {
     return this->link;
 }

@@ -2,8 +2,8 @@
 
 TableModel::TableModel()
 {
-    rootNode = new TreeNode(new Link("", "" ,""));
-    rootNode->getLink()->setData(Link::DATA_IS_CONTAINER, QVariant(true));
+    rootNode = new TreeNode(new MediaObject("", "" ,""));
+    rootNode->getLink()->setData(MediaObject::DATA_IS_CONTAINER, QVariant(true));
 }
 
 TableModel::~TableModel()
@@ -11,31 +11,31 @@ TableModel::~TableModel()
     delete rootNode;
 }
 
-int TableModel::mapDataToColumn(Link::Data data)
+int TableModel::mapDataToColumn(MediaObject::Data data)
 {
     switch (data) {
-    case Link::DATA_TITLE: return 0;
-    case Link::DATA_PROGRESS: return 1;
+    case MediaObject::DATA_TITLE: return 0;
+    case MediaObject::DATA_PROGRESS: return 1;
     default: return 0;
     }
 }
 
-Link::Data TableModel::mapColumnToData(int column)
+MediaObject::Data TableModel::mapColumnToData(int column)
 {
     switch (column) {
-    case 0: return Link::DATA_TITLE;
-    case 1: return Link::DATA_PROGRESS;
+    case 0: return MediaObject::DATA_TITLE;
+    case 1: return MediaObject::DATA_PROGRESS;
     }
-    return Link::DATA_INVALID;
+    return MediaObject::DATA_INVALID;
 }
 
-Link *TableModel::addLink(QString link, Link *parent)
+MediaObject *TableModel::addLink(QString link, MediaObject *parent)
 {
-    Link *mediaLink = new Link(link, link, "0%");
+    MediaObject *mediaLink = new MediaObject(link, link, "0%");
     return this->addLink(mediaLink, parent);
 }
 
-Link *TableModel::addLink(Link *link, Link *parent)
+MediaObject *TableModel::addLink(MediaObject *link, MediaObject *parent)
 {
     QModelIndex parentIndex = getIndexForLink(parent, 0);
     if(!parentIndex.isValid())
@@ -128,20 +128,20 @@ void TableModel::convertToContainer(const QModelIndex &index)
         indexNode = this->rootNode;
     }
 
-    if(!indexNode->getLink()->getData(Link::Data::DATA_IS_CONTAINER).toBool())
+    if(!indexNode->getLink()->getData(MediaObject::Data::DATA_IS_CONTAINER).toBool())
     {
-        Link *newLink = new Link(*(indexNode->getLink()));
-        indexNode->getLink()->setData(Link::DATA_IS_CONTAINER, QVariant(true));
+        MediaObject *newLink = new MediaObject(*(indexNode->getLink()));
+        indexNode->getLink()->setData(MediaObject::DATA_IS_CONTAINER, QVariant(true));
         updateLinkProgress(indexNode->getLink(), "");
         refreshName(indexNode->getLink(), "Container");
-        indexNode->getLink()->setData(Link::DATA_IS_CONTAINER, QVariant(true));
+        indexNode->getLink()->setData(MediaObject::DATA_IS_CONTAINER, QVariant(true));
         beginInsertRows(index, indexNode->getChildNodeCount(), indexNode->getChildNodeCount());
         indexNode->appendChildNode(new TreeNode(newLink, indexNode));
         endInsertRows();
     }
 }
 
-QModelIndex TableModel::getIndexForLink(Link *link, int column, TreeNode *currentNode) const
+QModelIndex TableModel::getIndexForLink(MediaObject *link, int column, TreeNode *currentNode) const
 {
     if(currentNode == nullptr)
     {
@@ -195,7 +195,7 @@ QModelIndex TableModel::getIndexForTreeNode(TreeNode *treeNode, int column, Tree
     return QModelIndex();
 }
 
-Link *TableModel::getUnprocessedLink(TreeNode *currentNode)
+MediaObject *TableModel::getUnprocessedLink(TreeNode *currentNode)
 {
     if(currentNode == nullptr)
     {
@@ -203,7 +203,7 @@ Link *TableModel::getUnprocessedLink(TreeNode *currentNode)
     }
     if(currentNode != this->rootNode)
     {
-        if(!currentNode->getLink()->getData(Link::DATA_IS_STARTED).toBool() && currentNode->getLink()->getData(Link::DATA_IS_CONTAINER).toBool() == false)
+        if(!currentNode->getLink()->getData(MediaObject::DATA_IS_STARTED).toBool() && currentNode->getLink()->getData(MediaObject::DATA_IS_CONTAINER).toBool() == false)
         {
             return currentNode->getLink();
         }
@@ -211,8 +211,8 @@ Link *TableModel::getUnprocessedLink(TreeNode *currentNode)
     for(int i = 0; i < currentNode->getChildNodeCount(); i++)
     {
         TreeNode *nextNode = currentNode->getChildNodes().value(i);
-        Link *link = this->getUnprocessedLink(nextNode);
-        if(link && !link->getData(Link::DATA_IS_STARTED).toBool() && link->getData(Link::DATA_IS_CONTAINER).toBool() == false)
+        MediaObject *link = this->getUnprocessedLink(nextNode);
+        if(link && !link->getData(MediaObject::DATA_IS_STARTED).toBool() && link->getData(MediaObject::DATA_IS_CONTAINER).toBool() == false)
         {
             return link;
         }
@@ -220,27 +220,27 @@ Link *TableModel::getUnprocessedLink(TreeNode *currentNode)
     return nullptr;
 }
 
-Link *TableModel::getParentLink(Link *link)
+MediaObject *TableModel::getParentLink(MediaObject *link)
 {
     TreeNode *linkNode = (TreeNode*) getIndexForLink(link, 0).internalPointer();
     return linkNode->getParentNode()->getLink();
 }
 
-void TableModel::updateLinkProgress(Link *link, QString progress)
+void TableModel::updateLinkProgress(MediaObject *link, QString progress)
 {
-    link->setData(Link::DATA_PROGRESS, progress);
-    emit dataChanged(this->getIndexForLink(link, this->mapDataToColumn(Link::DATA_PROGRESS)),
-                     this->getIndexForLink(link, this->mapDataToColumn(Link::DATA_PROGRESS)));
+    link->setData(MediaObject::DATA_PROGRESS, progress);
+    emit dataChanged(this->getIndexForLink(link, this->mapDataToColumn(MediaObject::DATA_PROGRESS)),
+                     this->getIndexForLink(link, this->mapDataToColumn(MediaObject::DATA_PROGRESS)));
 }
 
-void TableModel::refreshName(Link *link, QString name)
+void TableModel::refreshName(MediaObject *link, QString name)
 {
     if(!name.isEmpty())
     {
-        link->setData(Link::DATA_TITLE, QVariant(name));
+        link->setData(MediaObject::DATA_TITLE, QVariant(name));
     }
-    emit dataChanged(this->getIndexForLink(link, this->mapDataToColumn(Link::DATA_TITLE)),
-                     this->getIndexForLink(link, this->mapDataToColumn(Link::DATA_TITLE)));
+    emit dataChanged(this->getIndexForLink(link, this->mapDataToColumn(MediaObject::DATA_TITLE)),
+                     this->getIndexForLink(link, this->mapDataToColumn(MediaObject::DATA_TITLE)));
 }
 
 QModelIndex TableModel::index(int row, int column, const QModelIndex &parent) const
@@ -289,7 +289,7 @@ int TableModel::rowCount(const QModelIndex &parent) const
 
 int TableModel::columnCount(const QModelIndex &parent) const
 {
-    return Link::DISPLAY_MAX_PROPERTIES;
+    return MediaObject::DISPLAY_MAX_PROPERTIES;
 }
 
 QVariant TableModel::data(const QModelIndex &index, int role) const

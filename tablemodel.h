@@ -11,7 +11,7 @@
 #include <QMutableListIterator>
 #include <QDropEvent>
 
-#include "link.h"
+#include "mediaobject.h"
 #include "treenode.h"
 
 
@@ -23,12 +23,12 @@ public:
     TableModel();
     ~TableModel();
 
-    static int mapDataToColumn(Link::Data data);
-    static Link::Data mapColumnToData(int column);
+    static int mapDataToColumn(MediaObject::Data data);
+    static MediaObject::Data mapColumnToData(int column);
 
     //Helper functions to easily manipulate the table
-    Link *addLink(QString link, Link *parent = nullptr);
-    Link *addLink(Link *link, Link *parent = nullptr);
+    MediaObject *addLink(QString link, MediaObject *parent = nullptr);
+    MediaObject *addLink(MediaObject *link, MediaObject *parent = nullptr);
 
     void deleteIndex(QModelIndex index);
     bool myRemoveRows(int row, int count, const QModelIndex &parent);
@@ -38,14 +38,14 @@ public:
     void convertToContainer(const QModelIndex &index);
 
     // Helper functions to easily retrieve data
-    QModelIndex getIndexForLink(Link *link, int column, TreeNode *currentNode = nullptr) const;
+    QModelIndex getIndexForLink(MediaObject *link, int column, TreeNode *currentNode = nullptr) const;
     QModelIndex getIndexForTreeNode(TreeNode *treeNode, int column, TreeNode *currentNode = nullptr) const;
 
     // STUBS
-    Link *getUnprocessedLink(TreeNode *currentNode = nullptr);
-    Link *getParentLink(Link *link);
-    void updateLinkProgress(Link *link, QString progress);
-    void refreshName(Link *link, QString name = "");
+    MediaObject *getUnprocessedLink(TreeNode *currentNode = nullptr);
+    MediaObject *getParentLink(MediaObject *link);
+    void updateLinkProgress(MediaObject *link, QString progress);
+    void refreshName(MediaObject *link, QString name = "");
 
 
     // The following functions are required to be implemented and belong to the table model

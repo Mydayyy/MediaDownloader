@@ -49,6 +49,16 @@ void WindowSettings::on_checkboxCreateContainerSubfolder_toggled(bool checked)
     SettingsManager::getInstance().set("createContainerSubfolder", QVariant(checked));
 }
 
+void WindowSettings::on_checkboxOnlyAudio_toggled(bool checked)
+{
+    SettingsManager::getInstance().set("extractOnlyAudio", QVariant(checked));
+}
+
+void WindowSettings::on_comboAudioFormat_currentTextChanged(const QString &format)
+{
+    SettingsManager::getInstance().set("audioFormat", QVariant(format));
+}
+
 void WindowSettings::on_buttonCloseSettings_clicked()
 {
     this->close();
@@ -59,7 +69,10 @@ void WindowSettings::initializeCurrentSettings()
     ui->inputSavePath->setText(SettingsManager::getInstance().get("downloadSavePath").toString());
     ui->inputConcurrentDownloads->setValue(SettingsManager::getInstance().get("concurrentDownloads", DEFAULT_CONCURRENT_DOWNLOADS).toInt());
     ui->checkboxCreateContainerSubfolder->setChecked(SettingsManager::getInstance().get("createContainerSubfolder", QVariant(DEFAULT_CREATE_CONTAINER_SUBFOLDER)).toBool());
+    ui->checkboxOnlyAudio->setChecked(SettingsManager::getInstance().get("extractOnlyAudio", QVariant(DEFAULT_EXTRACT_AUDIO)).toBool());
+    ui->comboAudioFormat->setItemText(0, SettingsManager::getInstance().get("audioFormat", QVariant(DEFAULT_AUDIO_FORMAT)).toString());
 }
+
 
 
 

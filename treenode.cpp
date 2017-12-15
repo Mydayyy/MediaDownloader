@@ -7,13 +7,13 @@ TreeNode::TreeNode()
 {
 }
 
-TreeNode::TreeNode(Link *link)
+TreeNode::TreeNode(MediaObject *link)
     : link(link),
       parentNode(nullptr)
 {
 }
 
-TreeNode::TreeNode(Link *link, TreeNode *parentNode)
+TreeNode::TreeNode(MediaObject *link, TreeNode *parentNode)
     : link(link),
       parentNode(parentNode)
 {
@@ -74,12 +74,12 @@ int TreeNode::getChildNodeCount()
     return childNodes.count();
 }
 
-void TreeNode::setLink(Link *newLink)
+void TreeNode::setLink(MediaObject *newLink)
 {
     this->link = newLink;
 }
 
-Link *TreeNode::getLink()
+MediaObject *TreeNode::getLink()
 {
     return this->link;
 }
@@ -100,7 +100,7 @@ int TreeNode::row()
 
 int TreeNode::columnCount()
 {
-    return Link::DISPLAY_MAX_PROPERTIES;
+    return MediaObject::DISPLAY_MAX_PROPERTIES;
 }
 
 TreeNode *TreeNode::getParentNode()

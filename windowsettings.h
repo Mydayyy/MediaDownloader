@@ -32,6 +32,10 @@ private slots:
 
     void on_inputSavePath_editingFinished();
 
+    void on_checkboxOnlyAudio_toggled(bool checked);
+
+    void on_comboAudioFormat_currentTextChanged(const QString &format);
+
 private:
     Ui::WindowSettings *ui;
 

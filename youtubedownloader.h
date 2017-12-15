@@ -42,17 +42,17 @@ public slots:
     void clipboardChanged(QString newText);
 
     // INFORMATION EXTRACTION
-    void extractedLinkInformation(QList<Link*> videos, QString playlistTitle);
+    void extractedLinkInformation(QList<MediaObject*> videos, QString playlistTitle);
     void extractLinkInformationFailed(QString stderr, bool reportError = false);
 
     // DOWNLOADING
     void downloadNext();
-    void downloadVideoFailed(Link *link, QString error);
-    void downloadVideoSkipped(Link *link);
-    void downloadVideoRenamed(Link *link, QString newName);
-    void downloadVideoUpdateProgress(Link *link, QString percentage, QString maxsize, QString speed, QString remaining);
-    void downloadVideoUpdateProgressLast(Link *link, QString maxsize, QString time);
-    void downloadVideoFinished(Link *link);
+    void downloadVideoFailed(MediaObject *link, QString error);
+    void downloadVideoSkipped(MediaObject *link);
+    void downloadVideoRenamed(MediaObject *link, QString newName);
+    void downloadVideoUpdateProgress(MediaObject *link, QString percentage, QString maxsize, QString speed, QString remaining);
+    void downloadVideoUpdateProgressLast(MediaObject *link, QString maxsize, QString time);
+    void downloadVideoFinished(MediaObject *link);
     void downloadWatchdog();
 };
 

@@ -26,24 +26,24 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += main.cpp\
         mainwindow.cpp \
     tablemodel.cpp \
-    link.cpp \
     youtubedownloader.cpp \
     youtubeinterface.cpp \
     settingsmanager.cpp \
     windowsettings.cpp \
     process.cpp \
-    treenode.cpp
+    treenode.cpp \
+    mediaobject.cpp
 
 HEADERS  += mainwindow.h \
     tablemodel.h \
-    link.h \
     youtubedownloader.h \
     youtubeinterface.h \
     settingsmanager.h \
     windowsettings.h \
     constants.h \
     process.h \
-    treenode.h
+    treenode.h \
+    mediaobject.h
 
 FORMS    += mainwindow.ui \
     windowsettings.ui

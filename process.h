@@ -1,7 +1,7 @@
 #ifndef PROCESS_H
 #define PROCESS_H
 #include <QProcess>
-#include "link.h"
+#include "mediaobject.h"
 
 
 class Process : public QProcess
@@ -10,11 +10,11 @@ public:
     Process(QObject *parent = Q_NULLPTR);
     ~Process();
 
-    void setLink(Link *link);
-    Link *getLink();
+    void setLink(MediaObject *link);
+    MediaObject *getLink();
 
 private:
-    Link *link;
+    MediaObject *link;
 };
 
 #endif // PROCESS_H

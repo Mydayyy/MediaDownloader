@@ -23,7 +23,7 @@ void YoutubeInterface::extractVideoInformation(QString url, bool messageBoxForEr
 
 }
 
-void YoutubeInterface::downloadVideo(Link *link, QString containerTitle)
+void YoutubeInterface::downloadVideo(MediaObject *link, QString containerTitle)
 {
     DownloadData data;
     data.fullpath = "";
@@ -45,7 +45,7 @@ void YoutubeInterface::downloadVideo(Link *link, QString containerTitle)
     Process *getFilenameProcess = new Process(this);
     getFilenameProcess->setLink(link); // We need to access the link later in the slots
     connect(getFilenameProcess, SIGNAL(finished(int)), this, SLOT(extractedFilename(int)));
-    getFilenameProcess->start("youtube-dl --no-mtime --get-filename -f best -o \""+destinationPath+"\" " + link->getData(Link::DATA_LINK).toString() + "");
+    getFilenameProcess->start("youtube-dl --no-mtime --get-filename -o \""+destinationPath+"\" " + link->getData(MediaObject::DATA_LINK).toString() + "");
 }
 
 void YoutubeInterface::resetDownloadSession()
@@ -60,7 +60,7 @@ void YoutubeInterface::extractedFilename(int exitcode)
 
     Process *getFilenameProcess = (Process*) this->sender();
     getFilenameProcess->deleteLater();
-    Link *link = getFilenameProcess->getLink();
+    MediaObject *link = getFilenameProcess->getLink();
 
     Process *downloaderProcess = new Process(this);
     downloaderProcess->setLink(link);
@@ -130,7 +130,7 @@ void YoutubeInterface::extractedFilename(int exitcode)
             }
             QFileInfo newFile = this->makeFilepathUnique(destinationPath); // Get a unique filepath. This will just append [0-9]+ until a free name is found.
             destinationPath = newFile.path() + QDir::separator() + newFile.baseName() + "." + newFile.completeSuffix();
-            link->setData(Link::DATA_TITLE, newFile.baseName());
+            link->setData(MediaObject::DATA_TITLE, newFile.baseName());
             emit downloadVideoRenamed(link, newFile.baseName()); // Also inform the model about the new name.
         }
         if(mb.clickedButton() == skipButton || this->overwriteBehaviour == OverwriteBehaviour::SKIP) // SKIP
@@ -153,17 +153,24 @@ void YoutubeInterface::extractedFilename(int exitcode)
         }
 
     }
+
+    // Check whether the user only wants to download audio
+    QString onlyAudioOption = "";
+    if(SettingsManager::getInstance().get("extractOnlyAudio", QVariant(DEFAULT_EXTRACT_AUDIO)).toBool()) {
+        onlyAudioOption = "-x --audio-format "+ SettingsManager::getInstance().get("audioFormat", QVariant(DEFAULT_AUDIO_FORMAT)).toString() +" --audio-quality 0 ";
+    }
+
     this->createdFilepaths.append(destinationPath);
-    downloaderProcess->start("youtube-dl --no-mtime "+skipOption+"-f best -o \""+destinationPath+"\" " + link->getData(Link::DATA_LINK).toString() + "");
+    downloaderProcess->start("youtube-dl --no-mtime "+skipOption+onlyAudioOption+" -o \""+destinationPath+"\" " + link->getData(MediaObject::DATA_LINK).toString() + "");
     emit downloadVideoStarted(link);
 }
 
 void YoutubeInterface::resumeDownloadsAfterDialog()
 {
-    QList<Link*>::iterator it = this->downloadsToResume.begin();
+    QList<MediaObject*>::iterator it = this->downloadsToResume.begin();
     while(it != this->downloadsToResume.end())
     {
-        Link *link = *it;
+        MediaObject *link = *it;
         it = this->downloadsToResume.erase(it);
         this->downloadVideo(link, this->runningDownloads[link].containerTitle);
     }
@@ -195,7 +202,7 @@ void YoutubeInterface::videoDownloadingProcessEnd(int exitCode)
     Q_UNUSED(exitCode);
 
     Process *downloadProcess = (Process*) this->sender();
-    Link *link = downloadProcess->getLink();
+    MediaObject *link = downloadProcess->getLink();
     this->runningDownloads.remove(link);
     downloadProcess->deleteLater();
     emit downloadVideoFinished(link);
@@ -217,13 +224,13 @@ void YoutubeInterface::videoDownloadingProcessErrorOccured(Process::ProcessError
 void YoutubeInterface::videoDownloadingProcessStdOut()
 {
     Process *downloadProcess = (Process*) this->sender();
-    Link *link = downloadProcess->getLink();
+    MediaObject *link = downloadProcess->getLink();
     QString content = downloadProcess->readAllStandardOutput();
     this->videoDownloadingProcessHandleStdOut(link, content);
 
 }
 
-void YoutubeInterface::videoDownloadingProcessHandleStdOut(Link *link, QString output)
+void YoutubeInterface::videoDownloadingProcessHandleStdOut(MediaObject *link, QString output)
 {
     QRegExp rx("(\\r|\\n)");
     QStringList lines = output.split(rx);
@@ -307,7 +314,7 @@ void YoutubeInterface::videoExtractionProcessEnd(int exitCode, Process *process,
     QJsonArray videos = root["videos"].toArray();
     int videoCount = videos.count();
 
-    QList<Link*> videoLinks;
+    QList<MediaObject*> videoLinks;
     QString playlistTitle = "";
 
     for(int i = 0; i < videoCount; i++)
@@ -315,7 +322,7 @@ void YoutubeInterface::videoExtractionProcessEnd(int exitCode, Process *process,
         QJsonObject video = videos.at(i).toObject();
         QString title = video["title"].toString();
         QString url = video["webpage_url"].toString();
-        Link *link = new Link(title, url, "0%");
+        MediaObject *link = new MediaObject(title, url, "0%");
         videoLinks.append(link);
 
         if(video.contains("playlist_title"))

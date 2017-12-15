@@ -13,7 +13,7 @@
 #include <QStringList>
 #include <QClipboard>
 
-#include "link.h"
+#include "mediaobject.h"
 #include "tablemodel.h"
 #include "youtubedownloader.h"
 #include "windowsettings.h"

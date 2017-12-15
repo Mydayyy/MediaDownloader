@@ -7,19 +7,19 @@ YoutubeDownloader::YoutubeDownloader(TableModel *tableModel, QObject *parent)
     this->ytd = new YoutubeInterface();
 
     // Video Information Extraction
-    connect(this->ytd, SIGNAL(extractedVideoInformation(QList<Link*>,QString)),
-            this, SLOT(extractedLinkInformation(QList<Link*>,QString)));
+    connect(this->ytd, SIGNAL(extractedVideoInformation(QList<MediaObject*>,QString)),
+            this, SLOT(extractedLinkInformation(QList<MediaObject*>,QString)));
     connect(this->ytd, SIGNAL(extractedVideoInformationFailed(QString, bool)), this, SLOT(extractLinkInformationFailed(QString)));
 
     // Video Download Extraction
-    connect(this->ytd, SIGNAL(downloadVideoFailed(Link*,QString)), this, SLOT(downloadVideoFailed(Link*,QString)));
-    connect(this->ytd, SIGNAL(downloadVideoSkipped(Link*)), this, SLOT(downloadVideoSkipped(Link*)));
-    connect(this->ytd, SIGNAL(downloadVideoRenamed(Link*,QString)), this, SLOT(downloadVideoRenamed(Link*,QString)));
-    connect(this->ytd, SIGNAL(downloadVideoUpdateProgress(Link*,QString,QString,QString,QString)),
-            this, SLOT(downloadVideoUpdateProgress(Link*,QString,QString,QString,QString)));
-    connect(this->ytd, SIGNAL(downloadVideoUpdateProgressLast(Link*,QString,QString)),
-            this, SLOT(downloadVideoUpdateProgressLast(Link*,QString,QString)));
-    connect(this->ytd, SIGNAL(downloadVideoFinished(Link*)), this, SLOT(downloadVideoFinished(Link*)));
+    connect(this->ytd, SIGNAL(downloadVideoFailed(MediaObject*,QString)), this, SLOT(downloadVideoFailed(MediaObject*,QString)));
+    connect(this->ytd, SIGNAL(downloadVideoSkipped(MediaObject*)), this, SLOT(downloadVideoSkipped(MediaObject*)));
+    connect(this->ytd, SIGNAL(downloadVideoRenamed(MediaObject*,QString)), this, SLOT(downloadVideoRenamed(MediaObject*,QString)));
+    connect(this->ytd, SIGNAL(downloadVideoUpdateProgress(MediaObject*,QString,QString,QString,QString)),
+            this, SLOT(downloadVideoUpdateProgress(MediaObject*,QString,QString,QString,QString)));
+    connect(this->ytd, SIGNAL(downloadVideoUpdateProgressLast(MediaObject*,QString,QString)),
+            this, SLOT(downloadVideoUpdateProgressLast(MediaObject*,QString,QString)));
+    connect(this->ytd, SIGNAL(downloadVideoFinished(MediaObject*)), this, SLOT(downloadVideoFinished(MediaObject*)));
 
     // Setup a timer which will try to start new downloads at a specific interval.
     connect(&timerDownloadWatchdog, SIGNAL(timeout()), this, SLOT(downloadWatchdog()));
@@ -74,7 +74,7 @@ void YoutubeDownloader::clipboardChanged(QString newText)
     }
 }
 
-void YoutubeDownloader::extractedLinkInformation(QList<Link *> videos, QString playlistTitle)
+void YoutubeDownloader::extractedLinkInformation(QList<MediaObject *> videos, QString playlistTitle)
 {
     this->pendingExtractionProcesses--;
     if(videos.length() == 1) // This means we did not encounter a playlist, so we just append the song to the table
@@ -90,10 +90,10 @@ void YoutubeDownloader::extractedLinkInformation(QList<Link *> videos, QString p
         }
         else // otherwise we just take the name of the first video as the container name
         {
-            containerName = videos.at(0)->getData(Link::DATA_TITLE).toString();
+            containerName = videos.at(0)->getData(MediaObject::DATA_TITLE).toString();
         }
-        Link *container = new Link(containerName, "", "");
-        container->setData(Link::DATA_IS_CONTAINER, true); // We need to set the entry as a container
+        MediaObject *container = new MediaObject(containerName, "", "");
+        container->setData(MediaObject::DATA_IS_CONTAINER, true); // We need to set the entry as a container
         this->tableModel->addLink(container);
 
         for(int i = 0; i < videos.length(); i++) // And add all videos to the container
@@ -126,7 +126,7 @@ void YoutubeDownloader::downloadNext()
     }
     for(int i = 0; i < SettingsManager::getInstance().get("concurrentDownloads", DEFAULT_CONCURRENT_DOWNLOADS).toInt(); i++) //
     {
-        Link *link = this->tableModel->getUnprocessedLink(); // Get the next unprocessed link
+        MediaObject *link = this->tableModel->getUnprocessedLink(); // Get the next unprocessed link
         if(!link) // When no link was returned we can return here. In case we also have no pending download processes, we're also exiting download mode
         {
             if(this->pendingDownloadProcesses == 0)
@@ -145,19 +145,18 @@ void YoutubeDownloader::downloadNext()
             return;
         }
         this->pendingDownloadProcesses++;
-        link->setData(Link::DATA_IS_STARTED, QVariant(true));
+        link->setData(MediaObject::DATA_IS_STARTED, QVariant(true));
         if(SettingsManager::getInstance().get("createContainerSubfolder", DEFAULT_CREATE_CONTAINER_SUBFOLDER).toBool()) // Check whether we need to create a subfolder for containers
         {
-            Link *parentLink = this->tableModel->getParentLink(link); // Get the parent
+            MediaObject *parentLink = this->tableModel->getParentLink(link); // Get the parent
             if(parentLink) // When it is valid, we take the name of the parent ( the container ) and use it as the subfolder name
             {
-                this->ytd->downloadVideo(link, parentLink->getData(Link::DATA_TITLE).toString());
+                this->ytd->downloadVideo(link, parentLink->getData(MediaObject::DATA_TITLE).toString());
             }
             else
             {
                 this->ytd->downloadVideo(link); // Otherwise just download it to the root
             }
-
         }
         else
         {
@@ -167,7 +166,7 @@ void YoutubeDownloader::downloadNext()
     }
 }
 
-void YoutubeDownloader::downloadVideoFailed(Link *link, QString error)
+void YoutubeDownloader::downloadVideoFailed(MediaObject *link, QString error)
 {
     // VIDEO FINISHED WILL STILL BE EMITTED
     QMessageBox mb("Error",
@@ -175,28 +174,28 @@ void YoutubeDownloader::downloadVideoFailed(Link *link, QString error)
                    QMessageBox::Critical, QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
     mb.exec();
     this->tableModel->updateLinkProgress(link, "Failed");
-    link->setData(Link::DATA_IS_FAILED, QVariant(true));
+    link->setData(MediaObject::DATA_IS_FAILED, QVariant(true));
 }
 
-void YoutubeDownloader::downloadVideoSkipped(Link *link)
+void YoutubeDownloader::downloadVideoSkipped(MediaObject *link)
 {
     this->pendingDownloadProcesses--;
     this->tableModel->updateLinkProgress(link, "Skipped");
 }
 
-void YoutubeDownloader::downloadVideoRenamed(Link *link, QString newName)
+void YoutubeDownloader::downloadVideoRenamed(MediaObject *link, QString newName)
 {
     // The video was renamed due to being a duplicate. Just ensure that the table model also represents the naming change
     this->tableModel->refreshName(link);
 }
 
-void YoutubeDownloader::downloadVideoUpdateProgress(Link *link, QString percentage, QString maxsize, QString speed, QString remaining)
+void YoutubeDownloader::downloadVideoUpdateProgress(MediaObject *link, QString percentage, QString maxsize, QString speed, QString remaining)
 {
     QString progress = ""+percentage+" of "+maxsize+" at "+speed+" ( "+remaining+" )";
     this->tableModel->updateLinkProgress(link, progress);
 }
 
-void YoutubeDownloader::downloadVideoUpdateProgressLast(Link *link, QString maxsize, QString time)
+void YoutubeDownloader::downloadVideoUpdateProgressLast(MediaObject *link, QString maxsize, QString time)
 {
     // Sometimes we dont get the time delivered from youtube-dl
     QString progress = "100% of " + maxsize;
@@ -207,10 +206,10 @@ void YoutubeDownloader::downloadVideoUpdateProgressLast(Link *link, QString maxs
     this->tableModel->updateLinkProgress(link, progress);
 }
 
-void YoutubeDownloader::downloadVideoFinished(Link *link)
+void YoutubeDownloader::downloadVideoFinished(MediaObject *link)
 {
     this->pendingDownloadProcesses--;
-    link->setData(Link::DATA_IS_FINISHED, true);
+    link->setData(MediaObject::DATA_IS_FINISHED, true);
 }
 
 void YoutubeDownloader::downloadWatchdog()

@@ -21,7 +21,7 @@
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
 
-#include "link.h"
+#include "mediaobject.h"
 #include "settingsmanager.h"
 #include "constants.h"
 
@@ -45,7 +45,7 @@ public:
     YoutubeInterface();
     void extractVideoInformation(QString url, bool messageBoxForErrors = true);
 
-    void downloadVideo(Link *link, QString containerTitle = "");
+    void downloadVideo(MediaObject *link, QString containerTitle = "");
     void resetDownloadSession();
 
     bool isDialogOpen = false;
@@ -56,29 +56,29 @@ private:
     QStringList createdFilepaths;
     OverwriteBehaviour overwriteBehaviour = OverwriteBehaviour::NONE;
 
-    QMap<Link*, DownloadData> runningDownloads;
+    QMap<MediaObject*, DownloadData> runningDownloads;
     // Used to resume downloads which were aborted due to the dialog being opened
-    QList<Link*> downloadsToResume;
+    QList<MediaObject*> downloadsToResume;
 signals:
     // Extract Video Information
-    void extractedVideoInformation(QList<Link*>, QString playlistTitle);
+    void extractedVideoInformation(QList<MediaObject*>, QString playlistTitle);
     void extractedVideoInformationFailed(QString stderr, bool reportError);
 
     // Download Video
-    void downloadVideoFailed(Link *link, QString error);
-    void downloadVideoSkipped(Link *link);
-    void downloadVideoRenamed(Link *link, QString newName);
-    void downloadVideoStarted(Link *link);
-    void downloadVideoUpdateProgress(Link *link, QString percentage, QString maxsize, QString speed, QString remaining);
-    void downloadVideoUpdateProgressLast(Link *link, QString maxsize, QString time);
-    void downloadVideoFinished(Link *link);
+    void downloadVideoFailed(MediaObject *link, QString error);
+    void downloadVideoSkipped(MediaObject *link);
+    void downloadVideoRenamed(MediaObject *link, QString newName);
+    void downloadVideoStarted(MediaObject *link);
+    void downloadVideoUpdateProgress(MediaObject *link, QString percentage, QString maxsize, QString speed, QString remaining);
+    void downloadVideoUpdateProgressLast(MediaObject *link, QString maxsize, QString time);
+    void downloadVideoFinished(MediaObject *link);
 
 public slots:
     // QProcess Video Downloading Slots
     void videoDownloadingProcessEnd(int exitCode);
     void videoDownloadingProcessErrorOccured(QProcess::ProcessError error);
     void videoDownloadingProcessStdOut();
-    void videoDownloadingProcessHandleStdOut(Link *link, QString output);
+    void videoDownloadingProcessHandleStdOut(MediaObject *link, QString output);
     void videoDownloadingProcessStdErr();
     void extractedFilename(int exitcode);
     void resumeDownloadsAfterDialog();

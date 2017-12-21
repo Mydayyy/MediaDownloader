@@ -44,7 +44,8 @@ public:
     // STUBS
     MediaObject *getUnprocessedLink(TreeNode *currentNode = nullptr);
     MediaObject *getParentLink(MediaObject *link);
-    void updateLinkProgress(MediaObject *link, QString progress);
+    void updateLinkProgress(MediaObject *link);
+    void updateProgressCell(MediaObject *link);
     void refreshName(MediaObject *link, QString name = "");
 
 
@@ -53,6 +54,7 @@ public:
     QModelIndex parent(const QModelIndex &index) const;
     int rowCount(const QModelIndex &parent) const;
     int columnCount(const QModelIndex &parent) const;
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const;
     QVariant data(const QModelIndex &index, int role) const;
 
     // The following functions are required to support drag and drop inside the view

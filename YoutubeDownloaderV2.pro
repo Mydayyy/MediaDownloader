@@ -32,7 +32,8 @@ SOURCES += main.cpp\
     windowsettings.cpp \
     process.cpp \
     treenode.cpp \
-    mediaobject.cpp
+    mediaobject.cpp \
+    youtubedlparser.cpp
 
 HEADERS  += mainwindow.h \
     tablemodel.h \
@@ -43,7 +44,8 @@ HEADERS  += mainwindow.h \
     constants.h \
     process.h \
     treenode.h \
-    mediaobject.h
+    mediaobject.h \
+    youtubedlparser.h
 
 FORMS    += mainwindow.ui \
     windowsettings.ui

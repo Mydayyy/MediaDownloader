@@ -70,23 +70,23 @@ signals:
     void downloadVideoRenamed(MediaObject *link, QString newName);
     void downloadVideoStarted(MediaObject *link);
     void downloadVideoUpdateProgress(MediaObject *link, QString percentage, QString maxsize, QString speed, QString remaining);
-    void downloadVideoUpdateProgressLast(MediaObject *link, QString maxsize, QString time);
+    void downloadVideoDownloadFinished(MediaObject *link, QString maxsize, QString time);
     void downloadVideoFinished(MediaObject *link);
 
 public slots:
     // QProcess Video Downloading Slots
-    void videoDownloadingProcessEnd(int exitCode);
+    void videoDownloadingProcessEnd(int exitCode, QProcess::ExitStatus exitStatus);
     void videoDownloadingProcessErrorOccured(QProcess::ProcessError error);
     void videoDownloadingProcessStdOut();
     void videoDownloadingProcessHandleStdOut(MediaObject *link, QString output);
     void videoDownloadingProcessStdErr();
-    void extractedFilename(int exitcode);
+    void extractedFilename(int exitCode);
     void resumeDownloadsAfterDialog();
 
     // QProcess Video Extraction Slots
-    void videoExtractionProcessEnd(int exitCode, Process *process, bool reportErrors = true);
-    void videoExtractionProcessFinishedReportErrors(int exitCode);
-    void videoExtractionProcessFinishedNoErrors(int exitCode);
+    void videoExtractionProcessEnd(int exitCode, QProcess::ExitStatus exitStatus, Process *process, bool reportErrors = true);
+    void videoExtractionProcessFinishedReportErrors(int exitCode, QProcess::ExitStatus exitStatus);
+    void videoExtractionProcessFinishedNoErrors(int exitCode, QProcess::ExitStatus exitStatus);
     void videoExtractionProcessErrorOccured(QProcess::ProcessError error);
 };
 

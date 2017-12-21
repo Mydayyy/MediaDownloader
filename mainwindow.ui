@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>MediaDownloader</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -20,7 +20,7 @@
       <item>
        <widget class="QLineEdit" name="inputUrl">
         <property name="text">
-         <string/>
+         <string>https://www.youtube.com/watch?v=edLHziEngOIls</string>
         </property>
        </widget>
       </item>

@@ -51,7 +51,7 @@ public slots:
     void downloadVideoSkipped(MediaObject *link);
     void downloadVideoRenamed(MediaObject *link, QString newName);
     void downloadVideoUpdateProgress(MediaObject *link, QString percentage, QString maxsize, QString speed, QString remaining);
-    void downloadVideoUpdateProgressLast(MediaObject *link, QString maxsize, QString time);
+    void downloadVideoDownloadFinished(MediaObject *link, QString maxsize, QString time);
     void downloadVideoFinished(MediaObject *link);
     void downloadWatchdog();
 };

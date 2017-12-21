@@ -7,7 +7,12 @@ MediaObject::MediaObject(QString title, QString link, QString progress = "") :
     mIsStarted(false),
     mIsFinished(false),
     mIsFailed(false),
-    mIsContainer(false)
+    mIsSkipped(false),
+    mIsContainer(false),
+    mMaxSize(""),
+    mTime(""),
+    mDownloadedSize(""),
+    mSpeed("")
 {
 
 }
@@ -22,6 +27,11 @@ QVariant MediaObject::getData(MediaObject::Data data)
     case MediaObject::DATA_IS_STARTED: return mIsStarted;
     case MediaObject::DATA_IS_CONTAINER: return mIsContainer;
     case MediaObject::DATA_IS_FAILED: return mIsFailed;
+    case MediaObject::DATA_IS_SKIPPED: return mIsSkipped;
+    case MediaObject::DATA_MAX_SIZE: return mMaxSize;
+    case MediaObject::DATA_SPEED: return mSpeed;
+    case MediaObject::DATA_TIME: return mTime;
+    case MediaObject::DATA_DOWNLOADED_SIZE: return mDownloadedSize;
     default: throw; // TODO: proper error handling
     }
 }
@@ -36,6 +46,11 @@ void MediaObject::setData(MediaObject::Data data, QVariant value)
     case MediaObject::DATA_IS_STARTED: mIsStarted = value.toBool(); return;
     case MediaObject::DATA_IS_CONTAINER: mIsContainer = value.toBool(); return;
     case MediaObject::DATA_IS_FAILED: mIsFailed = value.toBool(); return;
+    case MediaObject::DATA_IS_SKIPPED: mIsSkipped = value.toBool(); return;
+    case MediaObject::DATA_MAX_SIZE: mMaxSize = value.toString(); return;
+    case MediaObject::DATA_SPEED: mSpeed = value.toString(); return;
+    case MediaObject::DATA_TIME: mTime = value.toString(); return;
+    case MediaObject::DATA_DOWNLOADED_SIZE: mDownloadedSize = value.toString(); return;
     default: throw; // TODO: proper error handling
     }
 }

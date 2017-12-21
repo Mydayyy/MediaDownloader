@@ -132,7 +132,7 @@ void TableModel::convertToContainer(const QModelIndex &index)
     {
         MediaObject *newLink = new MediaObject(*(indexNode->getLink()));
         indexNode->getLink()->setData(MediaObject::DATA_IS_CONTAINER, QVariant(true));
-        updateLinkProgress(indexNode->getLink(), "");
+        updateLinkProgress(indexNode->getLink());
         refreshName(indexNode->getLink(), "Container");
         indexNode->getLink()->setData(MediaObject::DATA_IS_CONTAINER, QVariant(true));
         beginInsertRows(index, indexNode->getChildNodeCount(), indexNode->getChildNodeCount());
@@ -226,9 +226,59 @@ MediaObject *TableModel::getParentLink(MediaObject *link)
     return linkNode->getParentNode()->getLink();
 }
 
-void TableModel::updateLinkProgress(MediaObject *link, QString progress)
+void TableModel::updateLinkProgress(MediaObject *link)
 {
-    link->setData(MediaObject::DATA_PROGRESS, progress);
+    if(link->getData(MediaObject::DATA_IS_CONTAINER).toBool()) {
+        link->setData(MediaObject::DATA_PROGRESS, "");
+        this->updateProgressCell(link);
+        return;
+    }
+
+    if(link->getData(MediaObject::DATA_IS_FAILED).toBool()) {
+        link->setData(MediaObject::DATA_PROGRESS, "FAILED");
+        this->updateProgressCell(link);
+        return;
+    }
+
+    if(link->getData(MediaObject::DATA_IS_SKIPPED).toBool()) {
+        link->setData(MediaObject::DATA_PROGRESS, "SKIPPED");
+        this->updateProgressCell(link);
+        return;
+    }
+
+    if(link->getData(MediaObject::DATA_IS_STARTED).toBool() && !link->getData(MediaObject::DATA_IS_FINISHED).toBool()) {
+        QString speed = link->getData(MediaObject::DATA_SPEED).toString();
+        QString maxSize = link->getData(MediaObject::DATA_MAX_SIZE).toString();
+        QString time = link->getData(MediaObject::DATA_TIME).toString();
+        QString progress = link->getData(MediaObject::DATA_DOWNLOADED_SIZE).toString();
+        QString str = ""+progress+" of "+maxSize+" at "+speed+" ( "+time+" )";
+        link->setData(MediaObject::DATA_PROGRESS, str);
+        this->updateProgressCell(link);
+        return;
+    }
+
+    if(link->getData(MediaObject::DATA_IS_STARTED).toBool() == false && link->getData(MediaObject::DATA_IS_FINISHED).toBool() == false) {
+        link->setData(MediaObject::DATA_PROGRESS, "0%");
+        this->updateProgressCell(link);
+        return;
+    }
+
+    if(link->getData(MediaObject::DATA_IS_FINISHED).toBool()) {
+        QString time = link->getData(MediaObject::DATA_TIME).toString();
+        QString maxSize = link->getData(MediaObject::DATA_MAX_SIZE).toString();
+        QString str = "100% of " + maxSize;
+        if(!time.isEmpty()) {
+            str += "  in " + time;
+        }
+        link->setData(MediaObject::DATA_PROGRESS, str);
+        this->updateProgressCell(link);
+        return;
+    }
+}
+
+void TableModel::updateProgressCell(MediaObject *link)
+{
+    qDebug() << link->getData(MediaObject::DATA_PROGRESS);
     emit dataChanged(this->getIndexForLink(link, this->mapDataToColumn(MediaObject::DATA_PROGRESS)),
                      this->getIndexForLink(link, this->mapDataToColumn(MediaObject::DATA_PROGRESS)));
 }
@@ -290,6 +340,23 @@ int TableModel::rowCount(const QModelIndex &parent) const
 int TableModel::columnCount(const QModelIndex &parent) const
 {
     return MediaObject::DISPLAY_MAX_PROPERTIES;
+}
+
+QVariant TableModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (section == -1)
+        return QVariant();
+    if (role == Qt::DisplayRole) {
+        if (orientation == Qt::Horizontal)      // we only have a horizontal header
+            switch (mapColumnToData(section)) {
+            case MediaObject::DATA_TITLE: return "Title";
+            case MediaObject::DATA_PROGRESS: return "Progress";
+            default: return "";
+            }
+        else    // vertical will be filled with index number (increasing)
+            return QString::number(section+1);
+    }
+    return QVariant();
 }
 
 QVariant TableModel::data(const QModelIndex &index, int role) const

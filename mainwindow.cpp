@@ -46,7 +46,7 @@ void MainWindow::setupTableModel()
     ui->treeTrackView->setDefaultDropAction(Qt::MoveAction);
     ui->treeTrackView->setContextMenuPolicy(Qt::CustomContextMenu);
 
-
+    this->tableModel->addLink("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
 //    Link *parentLink1 = this->tableModel->addLink("Link1");
 //        this->tableModel->addLink("Link1.1", parentLink1);
 //    Link *parentLink11 = this->tableModel->addLink("Link1.2", parentLink1);

@@ -18,3 +18,13 @@ MediaObject *Process::getLink()
 {
     return this->link;
 }
+
+QString Process::getUrl() const
+{
+    return url;
+}
+
+void Process::setUrl(const QString &value)
+{
+    url = value;
+}

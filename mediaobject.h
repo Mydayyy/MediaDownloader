@@ -15,7 +15,12 @@ public:
         DATA_IS_STARTED,
         DATA_IS_FINISHED,
         DATA_IS_CONTAINER,
-        DATA_IS_FAILED
+        DATA_IS_FAILED,
+        DATA_IS_SKIPPED,
+        DATA_DOWNLOADED_SIZE, // Indiciates the already downloaded amount
+        DATA_SPEED, // Indicates the current speed
+        DATA_MAX_SIZE, // Indicates the size of the download
+        DATA_TIME // Indicates the estimate time until the download finishes or the time needed when the download has finished
     };
 
     MediaObject(QString title, QString link, QString progress);
@@ -33,7 +38,12 @@ private:
     bool mIsStarted;
     bool mIsFinished;
     bool mIsFailed;
+    bool mIsSkipped;
     bool mIsContainer;
+    QString mMaxSize;
+    QString mSpeed;
+    QString mTime;
+    QString mDownloadedSize;
 };
 
 #endif // LINK_H

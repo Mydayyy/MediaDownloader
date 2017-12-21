@@ -9,7 +9,7 @@ YoutubeDownloader::YoutubeDownloader(TableModel *tableModel, QObject *parent)
     // Video Information Extraction
     connect(this->ytd, SIGNAL(extractedVideoInformation(QList<MediaObject*>,QString)),
             this, SLOT(extractedLinkInformation(QList<MediaObject*>,QString)));
-    connect(this->ytd, SIGNAL(extractedVideoInformationFailed(QString, bool)), this, SLOT(extractLinkInformationFailed(QString)));
+    connect(this->ytd, SIGNAL(extractedVideoInformationFailed(QString, bool)), this, SLOT(extractLinkInformationFailed(QString, bool)));
 
     // Video Download Extraction
     connect(this->ytd, SIGNAL(downloadVideoFailed(MediaObject*,QString)), this, SLOT(downloadVideoFailed(MediaObject*,QString)));
@@ -17,8 +17,8 @@ YoutubeDownloader::YoutubeDownloader(TableModel *tableModel, QObject *parent)
     connect(this->ytd, SIGNAL(downloadVideoRenamed(MediaObject*,QString)), this, SLOT(downloadVideoRenamed(MediaObject*,QString)));
     connect(this->ytd, SIGNAL(downloadVideoUpdateProgress(MediaObject*,QString,QString,QString,QString)),
             this, SLOT(downloadVideoUpdateProgress(MediaObject*,QString,QString,QString,QString)));
-    connect(this->ytd, SIGNAL(downloadVideoUpdateProgressLast(MediaObject*,QString,QString)),
-            this, SLOT(downloadVideoUpdateProgressLast(MediaObject*,QString,QString)));
+    connect(this->ytd, SIGNAL(downloadVideoDownloadFinished(MediaObject*,QString,QString)),
+            this, SLOT(downloadVideoDownloadFinished(MediaObject*,QString,QString)));
     connect(this->ytd, SIGNAL(downloadVideoFinished(MediaObject*)), this, SLOT(downloadVideoFinished(MediaObject*)));
 
     // Setup a timer which will try to start new downloads at a specific interval.
@@ -173,14 +173,13 @@ void YoutubeDownloader::downloadVideoFailed(MediaObject *link, QString error)
                    QString(error),
                    QMessageBox::Critical, QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
     mb.exec();
-    this->tableModel->updateLinkProgress(link, "Failed");
     link->setData(MediaObject::DATA_IS_FAILED, QVariant(true));
 }
 
 void YoutubeDownloader::downloadVideoSkipped(MediaObject *link)
 {
     this->pendingDownloadProcesses--;
-    this->tableModel->updateLinkProgress(link, "Skipped");
+    link->setData(MediaObject::DATA_IS_SKIPPED, true);
 }
 
 void YoutubeDownloader::downloadVideoRenamed(MediaObject *link, QString newName)
@@ -191,25 +190,25 @@ void YoutubeDownloader::downloadVideoRenamed(MediaObject *link, QString newName)
 
 void YoutubeDownloader::downloadVideoUpdateProgress(MediaObject *link, QString percentage, QString maxsize, QString speed, QString remaining)
 {
-    QString progress = ""+percentage+" of "+maxsize+" at "+speed+" ( "+remaining+" )";
-    this->tableModel->updateLinkProgress(link, progress);
+    link->setData(MediaObject::DATA_DOWNLOADED_SIZE, percentage);
+    link->setData(MediaObject::DATA_MAX_SIZE, maxsize);
+    link->setData(MediaObject::DATA_SPEED, speed);
+    link->setData(MediaObject::DATA_TIME, remaining);
+    this->tableModel->updateLinkProgress(link);
 }
 
-void YoutubeDownloader::downloadVideoUpdateProgressLast(MediaObject *link, QString maxsize, QString time)
+void YoutubeDownloader::downloadVideoDownloadFinished(MediaObject *link, QString maxsize, QString time)
 {
-    // Sometimes we dont get the time delivered from youtube-dl
-    QString progress = "100% of " + maxsize;
-    if(!time.isEmpty()) {
-        progress += "  in " + time;
-    }
-    progress += " ( FINISHED )";
-    this->tableModel->updateLinkProgress(link, progress);
+    link->setData(MediaObject::DATA_TIME, time);
+    link->setData(MediaObject::DATA_MAX_SIZE, maxsize);
+    this->tableModel->updateLinkProgress(link);
 }
 
 void YoutubeDownloader::downloadVideoFinished(MediaObject *link)
 {
-    this->pendingDownloadProcesses--;
     link->setData(MediaObject::DATA_IS_FINISHED, true);
+    this->tableModel->updateLinkProgress(link);
+    this->pendingDownloadProcesses--;
 }
 
 void YoutubeDownloader::downloadWatchdog()

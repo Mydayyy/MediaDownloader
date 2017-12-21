@@ -11,10 +11,15 @@ public:
     ~Process();
 
     void setLink(MediaObject *link);
+
     MediaObject *getLink();
+
+    QString getUrl() const;
+    void setUrl(const QString &value);
 
 private:
     MediaObject *link;
+    QString url;
 };
 
 #endif // PROCESS_H

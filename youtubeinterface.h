@@ -62,7 +62,7 @@ private:
 signals:
     // Extract Video Information
     void extractedVideoInformation(QList<MediaObject*>, QString playlistTitle);
-    void extractedVideoInformationFailed(QString stderr, bool reportError);
+    void extractedVideoInformationFailed(QString sterr, bool reportError);
 
     // Download Video
     void downloadVideoFailed(MediaObject *link, QString error);

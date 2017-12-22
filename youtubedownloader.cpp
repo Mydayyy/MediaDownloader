@@ -103,7 +103,7 @@ void YoutubeDownloader::extractedLinkInformation(QList<MediaObject *> videos, QS
     }
 }
 
-void YoutubeDownloader::extractLinkInformationFailed(QString stderr, bool reportError)
+void YoutubeDownloader::extractLinkInformationFailed(QString sterr, bool reportError)
 {
     this->pendingExtractionProcesses--;
     if(!reportError)
@@ -111,7 +111,7 @@ void YoutubeDownloader::extractLinkInformationFailed(QString stderr, bool report
         return;
     }
     QMessageBox mb("Error",
-                   QString(stderr),
+                   QString(sterr),
                    QMessageBox::Critical, QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
     mb.exec();
 }

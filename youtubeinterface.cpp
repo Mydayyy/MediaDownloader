@@ -330,9 +330,9 @@ void YoutubeInterface::videoExtractionProcessEnd(int exitCode, QProcess::ExitSta
         return;
     }
 
-    QByteArray stdout = extractorProcess->readAllStandardOutput();
+    QByteArray stout = extractorProcess->readAllStandardOutput();
     //QByteArray stderr = extractorProcess->readAllStandardError(); // We used to check for errors here, but scrapped it, as sometimes non critical stuff will be outputted
-    if(stdout.size() == 0) // Not quite sure whether this can happen.
+    if(stout.size() == 0) // Not quite sure whether this can happen.
     {
         qDebug() << "Error during extraction ( stdout empty ) for " << extractorProcess->getUrl() << exitCode << exitStatus << reportErrors;
         emit extractedVideoInformationFailed("No videos found", reportErrors);
@@ -340,7 +340,7 @@ void YoutubeInterface::videoExtractionProcessEnd(int exitCode, QProcess::ExitSta
     }
 
 
-    QJsonDocument doc = QJsonDocument::fromJson(stdout);
+    QJsonDocument doc = QJsonDocument::fromJson(stout);
     if(doc.isNull()) {
         qDebug() << "Error during extraction ( corrupt json ) for " << extractorProcess->getUrl() << exitCode << exitStatus << reportErrors;
         emit extractedVideoInformationFailed("Corrupted json returned", reportErrors);

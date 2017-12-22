@@ -43,7 +43,7 @@ public slots:
 
     // INFORMATION EXTRACTION
     void extractedLinkInformation(QList<MediaObject*> videos, QString playlistTitle);
-    void extractLinkInformationFailed(QString stderr, bool reportError = false);
+    void extractLinkInformationFailed(QString sterr, bool reportError = false);
 
     // DOWNLOADING
     void downloadNext();

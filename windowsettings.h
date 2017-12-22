@@ -8,7 +8,7 @@
 #include <QLineEdit>
 #include <QSpinBox>
 #include <QCheckBox>
-#include "constants.h"
+#include "myconstants.h"
 #include "settingsmanager.h"
 
 namespace Ui {

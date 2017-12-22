@@ -41,11 +41,11 @@ HEADERS  += mainwindow.h \
     youtubeinterface.h \
     settingsmanager.h \
     windowsettings.h \
-    constants.h \
-    process.h \
     treenode.h \
     mediaobject.h \
-    youtubedlparser.h
+    youtubedlparser.h \
+    myconstants.h \
+    myprocess.h
 
 FORMS    += mainwindow.ui \
     windowsettings.ui

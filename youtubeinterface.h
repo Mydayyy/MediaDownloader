@@ -2,7 +2,7 @@
 #define YOUTUBEINTERFACE_H
 
 #include <QObject>
-#include "process.h"
+#include "myprocess.h"
 #include <QDebug>
 #include <QMessageBox>
 #include <QDir>
@@ -23,7 +23,7 @@
 
 #include "mediaobject.h"
 #include "settingsmanager.h"
-#include "constants.h"
+#include "myconstants.h"
 
 enum OverwriteBehaviour {
     NONE,

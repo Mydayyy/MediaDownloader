@@ -1,4 +1,4 @@
-#include "process.h"
+#include "myprocess.h"
 
 Process::Process(QObject *parent) : QProcess(parent)
 {

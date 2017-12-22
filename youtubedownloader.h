@@ -8,7 +8,7 @@
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
 #include <QRegularExpressionMatchIterator>
-#include "constants.h"
+#include "myconstants.h"
 #include "tablemodel.h"
 #include "youtubeinterface.h"
 #include "settingsmanager.h"

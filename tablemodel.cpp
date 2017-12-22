@@ -278,7 +278,6 @@ void TableModel::updateLinkProgress(MediaObject *link)
 
 void TableModel::updateProgressCell(MediaObject *link)
 {
-    qDebug() << link->getData(MediaObject::DATA_PROGRESS);
     emit dataChanged(this->getIndexForLink(link, this->mapDataToColumn(MediaObject::DATA_PROGRESS)),
                      this->getIndexForLink(link, this->mapDataToColumn(MediaObject::DATA_PROGRESS)));
 }

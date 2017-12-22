@@ -120,7 +120,7 @@ void YoutubeDownloader::downloadNext()
 {
     // When a dialog is opened, asking the user what to do in a case of a duplicate,
     // we do not want to download any further videos but instead wait for his response
-    if(!this->isDownloading || this->ytd->isDialogOpen)
+    if(this->isDownloading == false || this->ytd->isDialogOpen)
     {
         return;
     }

@@ -21,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setupTableModel();
     this->youtube = new YoutubeDownloader(this->tableModel);
     this->clipboard = QApplication::clipboard();
+
 }
 
 MainWindow::~MainWindow()
@@ -47,16 +48,16 @@ void MainWindow::setupTableModel()
     ui->treeTrackView->setContextMenuPolicy(Qt::CustomContextMenu);
 
     this->tableModel->addLink("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
-//    Link *parentLink1 = this->tableModel->addLink("Link1");
-//        this->tableModel->addLink("Link1.1", parentLink1);
-//    Link *parentLink11 = this->tableModel->addLink("Link1.2", parentLink1);
-//            this->tableModel->addLink("Link1.2.1", parentLink11);
-//            this->tableModel->addLink("Link1.2.2", parentLink11);
-//            this->tableModel->addLink("Link1.2.3", parentLink11);
-//        this->tableModel->addLink("Link1.3", parentLink1);
-//    this->tableModel->addLink("Link2");
-//    this->tableModel->addLink("Link3");
-//    this->tableModel->addLink("Link4");
+    MediaObject *parentLink1 = this->tableModel->addLink("Link1");
+        this->tableModel->addLink("Link1.1", parentLink1);
+    MediaObject *parentLink11 = this->tableModel->addLink("Link1.2", parentLink1);
+            this->tableModel->addLink("Link1.2.1", parentLink11);
+            this->tableModel->addLink("Link1.2.2", parentLink11);
+            this->tableModel->addLink("Link1.2.3", parentLink11);
+        this->tableModel->addLink("Link1.3", parentLink1);
+    this->tableModel->addLink("Link2");
+    this->tableModel->addLink("Link3");
+    this->tableModel->addLink("Link4");
 
     connect(ui->treeTrackView, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(tableViewCustomContextMenu(QPoint))); // Custom Context Menu
 }
@@ -152,4 +153,9 @@ void MainWindow::onClipboardChanged()
 void MainWindow::on_actionAnalyse_clipboard_for_links_triggered()
 {
     this->onClipboardChanged();
+}
+
+void MainWindow::on_actionAbout_triggered()
+{
+    QMessageBox::about(this, "MediaDownloader", "<a href='https://github.com/mydayyy'>https://github.com/mydayyy</a>");
 }

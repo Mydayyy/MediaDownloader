@@ -33,7 +33,7 @@ SOURCES += main.cpp\
     process.cpp \
     treenode.cpp \
     mediaobject.cpp \
-    youtubedlparser.cpp
+    treeviewmediaobjectsettings.cpp
 
 HEADERS  += mainwindow.h \
     tablemodel.h \
@@ -43,12 +43,13 @@ HEADERS  += mainwindow.h \
     windowsettings.h \
     treenode.h \
     mediaobject.h \
-    youtubedlparser.h \
     myconstants.h \
-    myprocess.h
+    myprocess.h \
+    treeviewmediaobjectsettings.h
 
 FORMS    += mainwindow.ui \
-    windowsettings.ui
+    windowsettings.ui \
+    treeviewmediaobjectsettings.ui
 
 RESOURCES += \
     icons.qrc

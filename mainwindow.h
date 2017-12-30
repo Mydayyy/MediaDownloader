@@ -12,11 +12,17 @@
 #include <QDir>
 #include <QStringList>
 #include <QClipboard>
+#include <QPushButton>
+#include <QBoxLayout>
+#include <QSizePolicy>
+#include <QVBoxLayout>
+
 
 #include "mediaobject.h"
 #include "tablemodel.h"
 #include "youtubedownloader.h"
 #include "windowsettings.h"
+#include "treeviewmediaobjectsettings.h"
 
 namespace Ui {
 class MainWindow;
@@ -50,6 +56,7 @@ private slots:
     void on_actionClipboard_Watchdog_toggled(bool checked);
     void onClipboardChanged();
     void on_actionAnalyse_clipboard_for_links_triggered();
+    void on_actionAbout_triggered();
 };
 
 #endif // MAINWINDOW_H

@@ -32,8 +32,7 @@ SOURCES += main.cpp\
     windowsettings.cpp \
     process.cpp \
     treenode.cpp \
-    mediaobject.cpp \
-    treeviewmediaobjectsettings.cpp
+    mediaobject.cpp
 
 HEADERS  += mainwindow.h \
     tablemodel.h \
@@ -44,12 +43,10 @@ HEADERS  += mainwindow.h \
     treenode.h \
     mediaobject.h \
     myconstants.h \
-    myprocess.h \
-    treeviewmediaobjectsettings.h
+    myprocess.h
 
 FORMS    += mainwindow.ui \
-    windowsettings.ui \
-    treeviewmediaobjectsettings.ui
+    windowsettings.ui
 
 RESOURCES += \
     icons.qrc

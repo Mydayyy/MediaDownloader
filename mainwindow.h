@@ -22,7 +22,6 @@
 #include "tablemodel.h"
 #include "youtubedownloader.h"
 #include "windowsettings.h"
-#include "treeviewmediaobjectsettings.h"
 
 namespace Ui {
 class MainWindow;

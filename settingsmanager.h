@@ -8,23 +8,24 @@
 #include <QApplication>
 
 
-class SettingsManager
+class Settings
 {
 public:
-    static SettingsManager& getInstance()
+    static Settings& getInstance()
     {
-        static SettingsManager instance;
+        static Settings instance;
         return instance;
     }
 
+    Settings();
+    ~Settings();
+
 private:
-    SettingsManager();
-    ~SettingsManager();
     QSettings *settings;
 
 public:
-    SettingsManager(SettingsManager const&) = delete;
-    void operator=(SettingsManager const&)  = delete;
+    Settings(Settings const&) = delete;
+    void operator=(Settings const&)  = delete;
 
     void set(QString key, QVariant val);
     QVariant get(QString key);

@@ -1,6 +1,6 @@
 #include "settingsmanager.h"
 
-SettingsManager::SettingsManager()
+Settings::Settings()
 {
     QDir settingsPath;
     settingsPath.setPath(QCoreApplication::applicationDirPath());
@@ -9,22 +9,22 @@ SettingsManager::SettingsManager()
     this->settings = new QSettings(settingsPath.filePath(".config"), QSettings::IniFormat);
 }
 
-SettingsManager::~SettingsManager()
+Settings::~Settings()
 {
     delete this->settings;
 }
 
-QVariant SettingsManager::get(QString key)
+QVariant Settings::get(QString key)
 {
     return this->settings->value(key);
 }
 
-QVariant SettingsManager::get(QString key, QVariant defVal)
+QVariant Settings::get(QString key, QVariant defVal)
 {
     return this->settings->value(key, defVal);
 }
 
-void SettingsManager::set(QString key, QVariant val)
+void Settings::set(QString key, QVariant val)
 {
     this->settings->setValue(key, val);
     this->settings->sync();

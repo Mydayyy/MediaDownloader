@@ -22,7 +22,7 @@
 #include <QRegularExpressionMatch>
 
 #include "mediaobject.h"
-#include "settingsmanager.h"
+#include "settings.h"
 #include "myconstants.h"
 
 enum OverwriteBehaviour {

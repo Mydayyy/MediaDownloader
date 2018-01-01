@@ -9,7 +9,7 @@
 #include <QSpinBox>
 #include <QCheckBox>
 #include "myconstants.h"
-#include "settingsmanager.h"
+#include "settings.h"
 
 namespace Ui {
 class WindowSettings;

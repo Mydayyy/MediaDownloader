@@ -11,7 +11,7 @@
 #include "myconstants.h"
 #include "tablemodel.h"
 #include "youtubeinterface.h"
-#include "settingsmanager.h"
+#include "settings.h"
 
 class YoutubeDownloader : public QObject
 {

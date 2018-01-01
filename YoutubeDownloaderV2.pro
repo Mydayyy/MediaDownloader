@@ -28,22 +28,22 @@ SOURCES += main.cpp\
     tablemodel.cpp \
     youtubedownloader.cpp \
     youtubeinterface.cpp \
-    settingsmanager.cpp \
     windowsettings.cpp \
     process.cpp \
     treenode.cpp \
-    mediaobject.cpp
+    mediaobject.cpp \
+    settings.cpp
 
 HEADERS  += mainwindow.h \
     tablemodel.h \
     youtubedownloader.h \
     youtubeinterface.h \
-    settingsmanager.h \
     windowsettings.h \
     treenode.h \
     mediaobject.h \
     myconstants.h \
-    myprocess.h
+    myprocess.h \
+    settings.h
 
 FORMS    += mainwindow.ui \
     windowsettings.ui

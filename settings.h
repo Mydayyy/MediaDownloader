@@ -17,12 +17,14 @@ public:
         return instance;
     }
 
-    Settings();
+    Settings(bool inMemory = false);
     ~Settings();
 
 private:
     QSettings *settings;
+    QMap<QString, QVariant> inMemorySettings;
 
+    bool isInMemory;
 public:
     Settings(Settings const&) = delete;
     void operator=(Settings const&)  = delete;

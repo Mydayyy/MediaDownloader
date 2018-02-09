@@ -20,7 +20,7 @@ WindowSettings::~WindowSettings()
 // Filebrowsedialog which will be opened when the user clicks browse to select his downloadpath
 void WindowSettings::on_buttonBrowseFiles_clicked()
 {
-    QFileDialog fileBrowser(this, "Choose a download location", Settings::getInstance().get("downloadSavePath", DEFAULT_DOWNLOAD_SAVE_PATH).toString());
+    QFileDialog fileBrowser(this, "Choose a download location", Settings::getInstance().get("downloadSavePath").toString());
     fileBrowser.setFileMode(QFileDialog::DirectoryOnly);
     if(fileBrowser.exec() == QDialog::Accepted)
     {
@@ -67,10 +67,10 @@ void WindowSettings::on_buttonCloseSettings_clicked()
 void WindowSettings::initializeCurrentSettings()
 {
     ui->inputSavePath->setText(Settings::getInstance().get("downloadSavePath").toString());
-    ui->inputConcurrentDownloads->setValue(Settings::getInstance().get("concurrentDownloads", DEFAULT_CONCURRENT_DOWNLOADS).toInt());
-    ui->checkboxCreateContainerSubfolder->setChecked(Settings::getInstance().get("createContainerSubfolder", QVariant(DEFAULT_CREATE_CONTAINER_SUBFOLDER)).toBool());
-    ui->checkboxOnlyAudio->setChecked(Settings::getInstance().get("extractOnlyAudio", QVariant(DEFAULT_EXTRACT_AUDIO)).toBool());
-    ui->comboAudioFormat->setItemText(0, Settings::getInstance().get("audioFormat", QVariant(DEFAULT_AUDIO_FORMAT)).toString());
+    ui->inputConcurrentDownloads->setValue(Settings::getInstance().get("concurrentDownloads").toInt());
+    ui->checkboxCreateContainerSubfolder->setChecked(Settings::getInstance().get("createContainerSubfolder").toBool());
+    ui->checkboxOnlyAudio->setChecked(Settings::getInstance().get("extractOnlyAudio").toBool());
+    ui->comboAudioFormat->setItemText(0, Settings::getInstance().get("audioFormat").toString());
 }
 
 

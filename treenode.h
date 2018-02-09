@@ -30,6 +30,8 @@ struct TreeNode {
     TreeNode *getParentNode();
     void setParentNode(TreeNode *parent);
 
+    QVariant getSettingsValue(QString key);
+
 private:
     MediaObject *link;
     TreeNode *parentNode;

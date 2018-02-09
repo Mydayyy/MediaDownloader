@@ -10,9 +10,9 @@ MediaObject::MediaObject(QString title, QString link, QString progress = "") :
     mIsSkipped(false),
     mIsContainer(false),
     mMaxSize(""),
+    mSpeed(""),
     mTime(""),
-    mDownloadedSize(""),
-    mSpeed("")
+    mDownloadedSize("")
 {
 
 }
@@ -53,4 +53,9 @@ void MediaObject::setData(MediaObject::Data data, QVariant value)
     case MediaObject::DATA_DOWNLOADED_SIZE: mDownloadedSize = value.toString(); return;
     default: throw; // TODO: proper error handling
     }
+}
+
+Settings *MediaObject::getSettings()
+{
+    return &this->settings;
 }

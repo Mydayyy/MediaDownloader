@@ -15,7 +15,9 @@ Settings::Settings(bool inMemory)
 
 Settings::~Settings()
 {
-    delete this->settings;
+    if(this->settings) {
+        delete this->settings;
+    }
 }
 
 QVariant Settings::get(QString key)
@@ -23,7 +25,7 @@ QVariant Settings::get(QString key)
     if(isInMemory) {
         return this->inMemorySettings.value(key);
     } else {
-        return this->settings->value(key);
+        return this->settings->value(key, defaultSettings.value(key));
     }
 }
 
@@ -35,6 +37,15 @@ QVariant Settings::get(QString key, QVariant defVal)
         return this->settings->value(key, defVal);
     }
 
+}
+
+bool Settings::hasKey(QString key)
+{
+    if(isInMemory) {
+        return this->inMemorySettings.contains(key);
+    } else {
+        return this->settings->contains(key);
+    }
 }
 
 void Settings::set(QString key, QVariant val)

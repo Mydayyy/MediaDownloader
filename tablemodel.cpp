@@ -195,6 +195,26 @@ QModelIndex TableModel::getIndexForTreeNode(TreeNode *treeNode, int column, Tree
     return QModelIndex();
 }
 
+MediaObject TableModel::getLinkForIndex(const QModelIndex &index)
+{
+
+}
+
+QList<TreeNode *> TableModel::convertIndexListToTreeNodeList(const QModelIndexList list)
+{
+    QList<TreeNode*> treeNodeList;
+
+    for(auto it = list.begin(); it != list.end(); it++) {
+        QModelIndex item = *it;
+        TreeNode *linkNode = (TreeNode*) item.internalPointer();
+        if(treeNodeList.contains(linkNode)) {
+            continue;
+        }
+        treeNodeList.append(linkNode);
+    }
+    return treeNodeList;
+}
+
 MediaObject *TableModel::getUnprocessedLink(TreeNode *currentNode)
 {
     if(currentNode == nullptr)
@@ -290,6 +310,12 @@ void TableModel::refreshName(MediaObject *link, QString name)
     }
     emit dataChanged(this->getIndexForLink(link, this->mapDataToColumn(MediaObject::DATA_TITLE)),
                      this->getIndexForLink(link, this->mapDataToColumn(MediaObject::DATA_TITLE)));
+}
+
+void TableModel::redrawMediaObject(MediaObject *mo)
+{
+    emit dataChanged(this->getIndexForLink(mo, 0),
+                     this->getIndexForLink(mo, MediaObject::DISPLAY_MAX_PROPERTIES - 1));
 }
 
 QModelIndex TableModel::index(int row, int column, const QModelIndex &parent) const

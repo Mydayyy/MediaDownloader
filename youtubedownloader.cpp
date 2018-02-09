@@ -124,7 +124,7 @@ void YoutubeDownloader::downloadNext()
     {
         return;
     }
-    for(int i = 0; i < Settings::getInstance().get("concurrentDownloads", DEFAULT_CONCURRENT_DOWNLOADS).toInt(); i++) //
+    for(int i = 0; i < Settings::getInstance().get("concurrentDownloads").toInt(); i++) //
     {
         MediaObject *link = this->tableModel->getUnprocessedLink(); // Get the next unprocessed link
         if(!link) // When no link was returned we can return here. In case we also have no pending download processes, we're also exiting download mode
@@ -140,13 +140,13 @@ void YoutubeDownloader::downloadNext()
         }
         // When we already have all download slots busy, we return here
         // We might want to consider checking this at the start of this function. No clue why it is here.
-        if(this->pendingDownloadProcesses >= Settings::getInstance().get("concurrentDownloads", DEFAULT_CONCURRENT_DOWNLOADS).toInt())
+        if(this->pendingDownloadProcesses >= Settings::getInstance().get("concurrentDownloads").toInt())
         {
             return;
         }
         this->pendingDownloadProcesses++;
         link->setData(MediaObject::DATA_IS_STARTED, QVariant(true));
-        if(Settings::getInstance().get("createContainerSubfolder", DEFAULT_CREATE_CONTAINER_SUBFOLDER).toBool()) // Check whether we need to create a subfolder for containers
+        if(Settings::getInstance().get("createContainerSubfolder").toBool()) // Check whether we need to create a subfolder for containers
         {
             MediaObject *parentLink = this->tableModel->getParentLink(link); // Get the parent
             if(parentLink) // When it is valid, we take the name of the parent ( the container ) and use it as the subfolder name

@@ -22,6 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->youtube = new YoutubeDownloader(this->tableModel);
     this->clipboard = QApplication::clipboard();
 
+    updateSettingPanel();
 }
 
 MainWindow::~MainWindow()
@@ -60,6 +61,7 @@ void MainWindow::setupTableModel()
     this->tableModel->addLink("Link4");
 
     connect(ui->treeTrackView, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(tableViewCustomContextMenu(QPoint))); // Custom Context Menu
+    connect(ui->treeTrackView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), this, SLOT(onSelectionChanged(QItemSelection,QItemSelection)));
 }
 
 void MainWindow::tableViewCustomContextMenu(QPoint pos)
@@ -108,6 +110,9 @@ void MainWindow::on_buttonAddTrack_clicked()
 void MainWindow::on_actionSettings_triggered()
 {
     WindowSettings *ws = new WindowSettings(this);
+    connect(ws, &WindowSettings::destroyed, [=](QObject *obj){
+       this->updateSettingPanel();
+    });
     int startX = 0, startY = 0;
     startX = int (this->geometry().x() + this->geometry().width() / 2 - ws->geometry().width() / 2);
     startY = int (this->geometry().y() + this->geometry().height() / 2 - ws->geometry().height() /2);
@@ -115,6 +120,7 @@ void MainWindow::on_actionSettings_triggered()
     ws->setWindowModality(Qt::WindowModal);
     ws->setAttribute(Qt::WA_DeleteOnClose);
     ws->show();
+
 }
 
 void MainWindow::actionPlayTriggered(bool checked)
@@ -158,4 +164,73 @@ void MainWindow::on_actionAnalyse_clipboard_for_links_triggered()
 void MainWindow::on_actionAbout_triggered()
 {
     QMessageBox::about(this, "MediaDownloader", "<a href='https://github.com/mydayyy'>https://github.com/mydayyy</a>");
+}
+
+// INDIVIDUAL SONG SETTINGS STARTING HERE
+
+void MainWindow::onSelectionChanged(const QItemSelection &deselected, const QItemSelection &selected)
+{
+    this->updateSettingPanel();
+}
+
+void MainWindow::setSettingForCurrentObjects(QString key, QVariant val) {
+    QModelIndexList selectedIndexes = this->ui->treeTrackView->selectionModel()->selectedIndexes();
+    QList<TreeNode*> treeNodes = this->tableModel->convertIndexListToTreeNodeList(selectedIndexes);
+
+    for(auto it = treeNodes.begin(); it != treeNodes.end(); it++) {
+        (*it)->getLink()->getSettings()->set(key, val);
+        this->tableModel->redrawMediaObject((*it)->getLink());
+    }
+}
+
+void MainWindow::updateSettingPanel()
+{
+    QModelIndexList selectedIndexes = this->ui->treeTrackView->selectionModel()->selectedIndexes();
+    QList<TreeNode*> treeNodes = this->tableModel->convertIndexListToTreeNodeList(selectedIndexes);
+
+    if(treeNodes.size() != 1) {
+        ui->settingsPanel->hide();
+        return;
+    }
+    ui->settingsPanel->show();
+
+    TreeNode *tn = treeNodes.at(0);
+
+    ui->inputSavePath->setText(tn->getSettingsValue("downloadSavePath").toString());
+
+    QString format = tn->getSettingsValue("audioFormat").toString();
+    int index = ui->audioFormat->findText(format);
+    ui->audioFormat->setCurrentIndex(index);
+
+    ui->extractOnlyAudio->setChecked(tn->getSettingsValue("extractOnlyAudio").toBool());
+}
+
+void MainWindow::on_buttonBrowseFiles_clicked()
+{
+    QFileDialog fileBrowser(this, "Choose a download location", Settings::getInstance().get("downloadSavePath").toString());
+    fileBrowser.setFileMode(QFileDialog::DirectoryOnly);
+    if(fileBrowser.exec() == QDialog::Accepted)
+    {
+        if(fileBrowser.selectedFiles().size() > 0)
+        {
+            QString savePath = fileBrowser.selectedFiles()[0];
+            setSettingForCurrentObjects("downloadSavePath", savePath);
+            ui->inputSavePath->setText(savePath);
+        }
+    }
+}
+
+void MainWindow::on_inputSavePath_textEdited(const QString &text)
+{
+    setSettingForCurrentObjects("downloadSavePath", this->ui->inputSavePath->text());
+}
+
+void MainWindow::on_extractOnlyAudio_toggled(bool checked)
+{
+    setSettingForCurrentObjects("extractOnlyAudio", QVariant(checked));
+}
+
+void MainWindow::on_audioFormat_currentTextChanged(const QString &arg1)
+{
+    setSettingForCurrentObjects("audioFormat", QVariant(arg1));
 }

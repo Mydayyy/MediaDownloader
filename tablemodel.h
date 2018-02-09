@@ -40,6 +40,8 @@ public:
     // Helper functions to easily retrieve data
     QModelIndex getIndexForLink(MediaObject *link, int column, TreeNode *currentNode = nullptr) const;
     QModelIndex getIndexForTreeNode(TreeNode *treeNode, int column, TreeNode *currentNode = nullptr) const;
+    MediaObject getLinkForIndex(const QModelIndex &index);
+    QList<TreeNode *> convertIndexListToTreeNodeList(const QModelIndexList list);
 
     // STUBS
     MediaObject *getUnprocessedLink(TreeNode *currentNode = nullptr);
@@ -47,6 +49,7 @@ public:
     void updateLinkProgress(MediaObject *link);
     void updateProgressCell(MediaObject *link);
     void refreshName(MediaObject *link, QString name = "");
+    void redrawMediaObject(MediaObject *mo);
 
 
     // The following functions are required to be implemented and belong to the table model

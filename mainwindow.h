@@ -16,6 +16,8 @@
 #include <QBoxLayout>
 #include <QSizePolicy>
 #include <QVBoxLayout>
+#include <QGroupBox>
+#include <QComboBox>
 
 
 #include "mediaobject.h"
@@ -44,6 +46,9 @@ private:
 
     void setupTableModel();
 
+    void setSettingForCurrentObjects(QString key, QVariant val);
+    void updateSettingPanel();
+
 public slots:
     void tableViewCustomContextMenu(QPoint pos);
     void actionPlayTriggered(bool checked);
@@ -56,6 +61,12 @@ private slots:
     void onClipboardChanged();
     void on_actionAnalyse_clipboard_for_links_triggered();
     void on_actionAbout_triggered();
+    void on_buttonBrowseFiles_clicked();
+
+    void onSelectionChanged(const QItemSelection& deselected, const QItemSelection& selected);
+    void on_inputSavePath_textEdited(const QString &text);
+    void on_extractOnlyAudio_toggled(bool checked);
+    void on_audioFormat_currentTextChanged(const QString &arg1);
 };
 
 #endif // MAINWINDOW_H

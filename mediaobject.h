@@ -3,6 +3,7 @@
 
 #include <QString>
 #include <QVariant>
+#include "settings.h"
 
 class MediaObject
 {
@@ -29,6 +30,8 @@ public:
     QVariant getData(MediaObject::Data data);
     void setData(MediaObject::Data data, QVariant value);
 
+    Settings *getSettings();
+
     static const int DISPLAY_MAX_PROPERTIES = 2;
 
 private:
@@ -44,6 +47,8 @@ private:
     QString mSpeed;
     QString mTime;
     QString mDownloadedSize;
+
+    Settings settings;
 };
 
 #endif // LINK_H

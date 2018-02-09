@@ -112,3 +112,15 @@ void TreeNode::setParentNode(TreeNode *parent)
 {
     this->parentNode = parent;
 }
+
+QVariant TreeNode::getSettingsValue(QString key)
+{
+    if(!this->parentNode) {
+        return Settings::getInstance().get(key);
+    }
+    Settings *settings = this->getLink()->getSettings();
+    if(!settings->hasKey(key)) {
+        return this->parentNode->getSettingsValue(key);
+    }
+    return settings->get(key);
+}

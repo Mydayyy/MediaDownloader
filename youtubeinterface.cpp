@@ -31,11 +31,11 @@ void YoutubeInterface::downloadVideo(MediaObject *link, QString containerTitle)
     data.containerTitle = containerTitle;
     this->runningDownloads[link] = data; // Add to running downloads
 
-    QDir path(Settings::getInstance().get("downloadSavePath").toString());
+    QDir path(link->getSettingsValue("downloadSavePath").toString());
 
     if(!containerTitle.isEmpty()) // In case the subfolder does not exist, create it
     {
-        path.mkdir(containerTitle);
+        path.mkpath(containerTitle);
         path.cd(containerTitle);
     }
 
@@ -165,8 +165,8 @@ void YoutubeInterface::extractedFilename(int exitCode)
 
     // Check whether the user only wants to download audio
     QString onlyAudioOption = "";
-    if(Settings::getInstance().get("extractOnlyAudio").toBool()) {
-        onlyAudioOption = "-x --audio-format "+ Settings::getInstance().get("audioFormat").toString() +" --audio-quality 0 ";
+    if(link->getSettingsValue("extractOnlyAudio").toBool()) {
+        onlyAudioOption = "-x --audio-format "+ link->getSettingsValue("audioFormat").toString() +" --audio-quality 0 ";
     }
 
     this->createdFilepaths.append(destinationPath);

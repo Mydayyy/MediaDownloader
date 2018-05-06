@@ -4,6 +4,7 @@
 #include <QString>
 #include <QVariant>
 #include "settings.h"
+#include "treenode.h"
 
 class MediaObject
 {
@@ -34,6 +35,10 @@ public:
 
     static const int DISPLAY_MAX_PROPERTIES = 2;
 
+    QVariant getSettingsValue(QString key);
+
+    void setTreeNode(TreeNode *treeNode);
+    TreeNode *getTreeNode();
 private:
     QString mTitle;
     QString mLink;
@@ -49,6 +54,7 @@ private:
     QString mDownloadedSize;
 
     Settings settings;
+    TreeNode *treeNode;
 };
 
 #endif // LINK_H

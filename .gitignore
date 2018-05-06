@@ -4,3 +4,7 @@
 *.directory
 *.kdev4
 *.pro.user
+.idea/
+*.pro.user.*
+cmake-build-debug/
+CMakeLists.txt

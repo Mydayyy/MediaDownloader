@@ -8,21 +8,24 @@ TreeNode::TreeNode()
 }
 
 TreeNode::TreeNode(MediaObject *link)
-    : link(link),
+    : link(nullptr),
       parentNode(nullptr)
 {
+    this->setLink(link);
 }
 
 TreeNode::TreeNode(MediaObject *link, TreeNode *parentNode)
-    : link(link),
+    : link(nullptr),
       parentNode(parentNode)
 {
+    this->setLink(link);
 }
 
 TreeNode::~TreeNode()
 {
     if(link)
     {
+        this->link->setTreeNode(nullptr);
         delete link;
     }
     qDeleteAll(childNodes);
@@ -76,7 +79,11 @@ int TreeNode::getChildNodeCount()
 
 void TreeNode::setLink(MediaObject *newLink)
 {
+    if(this->link) {
+        this->link->setTreeNode(nullptr);
+    }
     this->link = newLink;
+    newLink->setTreeNode(this);
 }
 
 MediaObject *TreeNode::getLink()

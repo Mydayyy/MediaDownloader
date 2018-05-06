@@ -12,7 +12,8 @@ MediaObject::MediaObject(QString title, QString link, QString progress = "") :
     mMaxSize(""),
     mSpeed(""),
     mTime(""),
-    mDownloadedSize("")
+    mDownloadedSize(""),
+    treeNode(nullptr)
 {
 
 }
@@ -58,4 +59,22 @@ void MediaObject::setData(MediaObject::Data data, QVariant value)
 Settings *MediaObject::getSettings()
 {
     return &this->settings;
+}
+
+QVariant MediaObject::getSettingsValue(QString key)
+{
+    if(this->treeNode) {
+        return this->treeNode->getSettingsValue(key);
+    }
+    return Settings::getInstance().get(key);
+}
+
+void MediaObject::setTreeNode(TreeNode *treeNode)
+{
+    this->treeNode = treeNode;
+}
+
+TreeNode *MediaObject::getTreeNode()
+{
+    return this->treeNode;
 }

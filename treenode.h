@@ -2,8 +2,9 @@
 #define TREENODE_H
 
 #include <QList>
-#include "mediaobject.h"
+#include <QVariant>
 
+class MediaObject;
 struct TreeNode {
     TreeNode();
     TreeNode(MediaObject *link);

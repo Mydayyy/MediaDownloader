@@ -8,3 +8,4 @@
 *.pro.user.*
 cmake-build-debug/
 CMakeLists.txt
+CMakeLists.txt.user

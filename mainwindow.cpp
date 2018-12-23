@@ -14,21 +14,29 @@ MainWindow::MainWindow(QWidget *parent) :
     QAction *actionPlay = ui->toolBar->addAction(QIcon(":/toolbar/icons/play.png"), tr("Play"));
     connect(actionPlay, SIGNAL(triggered(bool)), this, SLOT(actionPlayTriggered(bool)));
 
+    QAction *actionStop = ui->toolBar->addAction(QIcon(":/toolbar/icons/stop.png"), tr("Stop"));
+    connect(actionStop, SIGNAL(triggered(bool)), this, SLOT(actionStopTriggered(bool)));
+
     // Unused for now. TODO: Implement
-    ui->toolBar->addAction(QIcon(":/toolbar/icons/pause.png"), tr("Pause"));
-    ui->toolBar->addAction(QIcon(":/toolbar/icons/stop.png"), tr("Stop"));
+    //ui->toolBar->addAction(QIcon(":/toolbar/icons/pause.png"), tr("Pause"));
+
 
     this->setupTableModel();
-    this->youtube = new YoutubeDownloader(this->tableModel);
+    this->mediaDownloader = new MediaDownloader(this->tableModel);
     this->clipboard = QApplication::clipboard();
 
     updateSettingPanel();
+
+//    this->tableModel->addLink("Test1");
+//    this->tableModel->addLink("Test2");
+//    auto a = this->tableModel->addLink("Test1");
+//    this->tableModel->addLink("Test2", a);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
-    delete this->youtube;
+    delete this->mediaDownloader;
     delete this->tableModel;
 
 }
@@ -72,7 +80,9 @@ void MainWindow::tableViewCustomContextMenu(QPoint pos)
         return;
     }
     QModelIndex selectedIndex = ui->treeTrackView->indexAt(pos);
-    MediaObject *link = static_cast<MediaObject*>(selectedIndex.internalPointer());
+    MediaObject *link = static_cast<TreeNode*>(selectedIndex.internalPointer())->getLink();
+
+    qDebug() << link->getData(MediaObject::DATA_TITLE);
 
     QMenu menu(this);
 
@@ -83,6 +93,12 @@ void MainWindow::tableViewCustomContextMenu(QPoint pos)
     if(link->getData(MediaObject::DATA_IS_FAILED).toBool())
     {
         menu.addAction(retryLink);
+    }
+
+    QAction *renameContainer = new QAction("Rename", &menu);
+    if(link->getData(MediaObject::DATA_IS_CONTAINER).toBool())
+    {
+        menu.addAction(renameContainer);
     }
 
     QAction *selectedAction = menu.exec(ui->treeTrackView->viewport()->mapToGlobal(pos));
@@ -98,13 +114,22 @@ void MainWindow::tableViewCustomContextMenu(QPoint pos)
         link->setData(MediaObject::DATA_IS_STARTED, QVariant(false));
         return;
     }
+    if(selectedAction == renameContainer)
+    {
+        bool ok;
+        QString newName = QInputDialog::getText(this, "Rename Container", "Enter a new name:", QLineEdit::Normal, QString(), &ok);
+        if(ok && !newName.isEmpty())
+        {
+            link->setData(MediaObject::DATA_TITLE, QVariant(newName));
+        }
+    }
 }
 
 
 
 void MainWindow::on_buttonAddTrack_clicked()
 {
-    this->youtube->addLink(ui->inputUrl->text());
+    this->mediaDownloader->addLink(ui->inputUrl->text());
 }
 
 void MainWindow::on_actionSettings_triggered()
@@ -125,7 +150,12 @@ void MainWindow::on_actionSettings_triggered()
 
 void MainWindow::actionPlayTriggered(bool checked)
 {
-    this->youtube->startDownload();
+    this->mediaDownloader->startDownload();
+}
+
+void MainWindow::actionStopTriggered(bool checked)
+{
+    this->mediaDownloader->stopDownload();
 }
 
 void MainWindow::on_actionClipboard_Watchdog_toggled(bool checked)
@@ -152,7 +182,7 @@ void MainWindow::onClipboardChanged()
             return;
         }
         this->lastClipboard = text;
-        this->youtube->clipboardChanged(text);
+        this->mediaDownloader->clipboardChanged(text);
     }
 }
 

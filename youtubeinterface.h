@@ -2,7 +2,6 @@
 #define YOUTUBEINTERFACE_H
 
 #include <QObject>
-#include "myprocess.h"
 #include <QDebug>
 #include <QMessageBox>
 #include <QDir>
@@ -21,9 +20,9 @@
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
 
+#include "myprocess.h"
 #include "mediaobject.h"
 #include "settings.h"
-#include "myconstants.h"
 
 enum OverwriteBehaviour {
     NONE,
@@ -43,9 +42,10 @@ class YoutubeInterface : public QObject
     Q_OBJECT
 public:
     YoutubeInterface();
-    void extractVideoInformation(QString url, bool messageBoxForErrors = true);
 
+    void extractVideoInformation(QString url, bool messageBoxForErrors = true);
     void downloadVideo(MediaObject *link, QString containerTitle = "");
+
     void resetDownloadSession();
 
     bool isDialogOpen = false;
@@ -57,12 +57,12 @@ private:
     OverwriteBehaviour overwriteBehaviour = OverwriteBehaviour::NONE;
 
     QMap<MediaObject*, DownloadData> runningDownloads;
-    // Used to resume downloads which were aborted due to the dialog being opened
-    QList<MediaObject*> downloadsToResume;
+
 signals:
     // Extract Video Information
     void extractedVideoInformation(QList<MediaObject*>, QString playlistTitle);
     void extractedVideoInformationFailed(QString sterr, bool reportError);
+    void downloadPostponed();
 
     // Download Video
     void downloadVideoFailed(MediaObject *link, QString error);
@@ -79,9 +79,7 @@ public slots:
     void videoDownloadingProcessErrorOccured(QProcess::ProcessError error);
     void videoDownloadingProcessStdOut();
     void videoDownloadingProcessHandleStdOut(MediaObject *link, QString output);
-    void videoDownloadingProcessStdErr();
     void extractedFilename(int exitCode);
-    void resumeDownloadsAfterDialog();
 
     // QProcess Video Extraction Slots
     void videoExtractionProcessEnd(int exitCode, QProcess::ExitStatus exitStatus, Process *process, bool reportErrors = true);

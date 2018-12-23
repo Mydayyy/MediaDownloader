@@ -9,6 +9,8 @@
 class MediaObject
 {
 public:
+    static const int DISPLAY_MAX_PROPERTIES = 2;
+
     enum Data {
         DATA_INVALID,
         DATA_LINK,
@@ -32,8 +34,6 @@ public:
     void setData(MediaObject::Data data, QVariant value);
 
     Settings *getSettings();
-
-    static const int DISPLAY_MAX_PROPERTIES = 2;
 
     QVariant getSettingsValue(QString key);
 

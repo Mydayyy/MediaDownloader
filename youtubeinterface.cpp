@@ -5,6 +5,12 @@ YoutubeInterface::YoutubeInterface()
 
 }
 
+void YoutubeInterface::resetDownloadSession()
+{
+    this->createdFilepaths.clear();
+    this->overwriteBehaviour = OverwriteBehaviour::NONE;
+}
+
 void YoutubeInterface::extractVideoInformation(QString url, bool messageBoxForErrors)
 {
     Process *extractorProcess = new Process(this);
@@ -21,6 +27,88 @@ void YoutubeInterface::extractVideoInformation(QString url, bool messageBoxForEr
     qDebug() << "Starting to extract " << url << " reporting errors: " << messageBoxForErrors;
     extractorProcess->setUrl(url);
     extractorProcess->start("youtube-dl --ignore-errors -s -J " + url); // -J  will dump the json, -s will simulate and not actually download anything
+}
+
+void YoutubeInterface::videoExtractionProcessFinishedReportErrors(int exitCode, QProcess::ExitStatus exitStatus)
+{
+    Process *extractorProcess = (Process*) this->sender();
+    this->videoExtractionProcessEnd(exitCode, exitStatus, extractorProcess, true);
+}
+
+void YoutubeInterface::videoExtractionProcessFinishedNoErrors(int exitCode, QProcess::ExitStatus exitStatus)
+{
+    Process *extractorProcess = (Process*) this->sender();
+    this->videoExtractionProcessEnd(exitCode, exitStatus, extractorProcess, false);
+}
+
+void YoutubeInterface::videoExtractionProcessErrorOccured(Process::ProcessError error)
+{
+    Process *extractorProcess = (Process*) this->sender();
+    qDebug() << "Error during extraction for " << extractorProcess->getUrl() << error;
+    if(error == QProcess::FailedToStart) {
+        extractorProcess->deleteLater();
+        emit extractedVideoInformationFailed("Extraction Process could not be started. Error Code: " + QString::number(error), true);
+    }
+}
+
+// Process Video Extraction Slots
+void YoutubeInterface::videoExtractionProcessEnd(int exitCode, QProcess::ExitStatus exitStatus, Process *process, bool reportErrors)
+{
+    Process *extractorProcess = process;
+    extractorProcess->deleteLater();
+    if(exitCode != 0) {
+        qDebug() << "Error during extraction for " << extractorProcess->getUrl() << exitCode << exitStatus << reportErrors;
+        emit extractedVideoInformationFailed("Error extracting video:\n\n" + extractorProcess->readAllStandardError(), reportErrors);
+        return;
+    }
+
+    QByteArray stout = extractorProcess->readAllStandardOutput();
+    if(stout.size() == 0) // Not quite sure whether this can happen.
+    {
+        qDebug() << "Error during extraction ( stdout empty ) for " << extractorProcess->getUrl() << exitCode << exitStatus << reportErrors;
+        emit extractedVideoInformationFailed("No videos found", reportErrors);
+        return;
+    }
+
+    QJsonDocument doc = QJsonDocument::fromJson(stout);
+    if(doc.isNull()) {
+        qDebug() << "Error during extraction ( corrupt json ) for " << extractorProcess->getUrl() << exitCode << exitStatus << reportErrors;
+        emit extractedVideoInformationFailed("Corrupted json returned", reportErrors);
+        return;
+    }
+
+    QJsonObject root = doc.object();
+
+    QJsonArray videos;
+    QString playlistTitle = "";
+
+    if(root.contains("_type")) {
+        QString type = root.value("_type").toString();
+        if(type == "playlist") {
+            videos = root.value("entries").toArray();
+            playlistTitle = root.value("title").toString();
+        } else {
+            qDebug() << "Error during extraction ( unsupported type ) for " << extractorProcess->getUrl() << exitCode << exitStatus << reportErrors;
+            emit extractedVideoInformationFailed("Unsupported type "+type+", please report the error and url where this happened", reportErrors);
+            return;
+        }
+    } else {
+        videos.append(root);
+    }
+
+    int videoCount = videos.count();
+    QList<MediaObject*> videoLinks;
+
+    for(int i = 0; i < videoCount; i++)
+    {
+        QJsonObject video = videos.at(i).toObject();
+        QString title = video["title"].toString();
+        QString url = video["webpage_url"].toString();
+        MediaObject *link = new MediaObject(title, url, "0%");
+        videoLinks.append(link);
+    }
+    qDebug() << "Successfully extracted " << extractorProcess->getUrl()  << exitCode << exitStatus << reportErrors;
+    emit extractedVideoInformation(videoLinks, playlistTitle);
 }
 
 void YoutubeInterface::downloadVideo(MediaObject *link, QString containerTitle)
@@ -49,12 +137,6 @@ void YoutubeInterface::downloadVideo(MediaObject *link, QString containerTitle)
     getFilenameProcess->start("youtube-dl --no-mtime --get-filename -o \""+destinationPath+"\" " + link->getData(MediaObject::DATA_LINK).toString() + "");
 }
 
-void YoutubeInterface::resetDownloadSession()
-{
-    this->createdFilepaths.clear();
-    this->overwriteBehaviour = OverwriteBehaviour::NONE;
-}
-
 void YoutubeInterface::extractedFilename(int exitCode)
 {
     Process *getFilenameProcess = (Process*) this->sender();
@@ -66,7 +148,6 @@ void YoutubeInterface::extractedFilename(int exitCode)
         this->runningDownloads.remove(link);
         qDebug() << "Error during downloading filename ( path empty or error set ) for" << link->getData(MediaObject::DATA_LINK).toString() << exitCode;
         emit downloadVideoFailed(link, getFilenameProcess->readAllStandardError());
-        emit downloadVideoFinished(link);
         return;
     }
 
@@ -78,7 +159,6 @@ void YoutubeInterface::extractedFilename(int exitCode)
     connect(downloaderProcess, SIGNAL(errorOccurred(QProcess::ProcessError)),
             this, SLOT(videoDownloadingProcessErrorOccured(QProcess::ProcessError)));
     connect(downloaderProcess, SIGNAL(readyReadStandardOutput()), this, SLOT(videoDownloadingProcessStdOut()));
-    connect(downloaderProcess, SIGNAL(readyReadStandardError()), this, SLOT(videoDownloadingProcessStdErr()));
 
     destinationPath = destinationPath.simplified(); // Strip it of \n\r\t and multiple spaces...
     QFileInfo fileCheck(destinationPath);
@@ -87,10 +167,14 @@ void YoutubeInterface::extractedFilename(int exitCode)
     this->runningDownloads[link].fullpath = destinationPath;
 
     // When the dialog is open, we abort all downloads until the user made a decision. They will be resumed after.
+    qDebug() << "IsDialogOpen:" << isDialogOpen;
     if(this->isDialogOpen) {
         downloaderProcess->deleteLater();
-        this->downloadsToResume.append(getFilenameProcess->getLink());
+        link->setData(MediaObject::DATA_IS_FAILED, QVariant(false));
+        link->setData(MediaObject::DATA_IS_STARTED, QVariant(false));
+        link->setData(MediaObject::DATA_IS_SKIPPED, QVariant(false));
         this->runningDownloads.remove(link);
+        emit downloadPostponed();
         return;
     }
 
@@ -124,10 +208,10 @@ void YoutubeInterface::extractedFilename(int exitCode)
 
         if(this->overwriteBehaviour == OverwriteBehaviour::NONE)
         {
+            qDebug() << "Setting isDialogOpen";
             this->isDialogOpen = true;
             mb.exec();
             this->isDialogOpen = false;
-            QTimer::singleShot(0, this, SLOT(resumeDownloadsAfterDialog())); // We want to resume downloads from the main event loop.
         }
         cb->deleteLater(); // I am not sure if we need to delete the checkbox or QT already takes care of that
 
@@ -176,17 +260,6 @@ void YoutubeInterface::extractedFilename(int exitCode)
     emit downloadVideoStarted(link);
 }
 
-void YoutubeInterface::resumeDownloadsAfterDialog()
-{
-    QList<MediaObject*>::iterator it = this->downloadsToResume.begin();
-    while(it != this->downloadsToResume.end())
-    {
-        MediaObject *link = *it;
-        it = this->downloadsToResume.erase(it);
-        this->downloadVideo(link, this->runningDownloads[link].containerTitle);
-    }
-}
-
 QFileInfo YoutubeInterface::makeFilepathUnique(QString filepath)
 {
     QFileInfo originalFile(filepath);
@@ -226,6 +299,8 @@ void YoutubeInterface::videoDownloadingProcessEnd(int exitCode, QProcess::ExitSt
     if(exitCode != 0) {
         qDebug() << "Download process had a nonzero exit code for" << link->getData(MediaObject::DATA_LINK).toString() << exitCode << exitStatus;
         emit downloadVideoFailed(link, "Download Failed ("+QString::number(exitCode)+"):\n\n" + downloadProcess->readAllStandardError());
+        this->runningDownloads.remove(link);
+        return;
     }
 
     this->runningDownloads.remove(link);
@@ -241,7 +316,6 @@ void YoutubeInterface::videoDownloadingProcessErrorOccured(Process::ProcessError
     qDebug() << "Download process crashed for" << link->getData(MediaObject::DATA_LINK).toString() << error;
     emit downloadVideoFailed(downloadProcess->getLink(), "Download Process Crashed. Error code: " + QString::number(error));
     this->runningDownloads.remove(downloadProcess->getLink());
-    emit downloadVideoFinished(downloadProcess->getLink());
 }
 
 void YoutubeInterface::videoDownloadingProcessStdOut()
@@ -295,110 +369,3 @@ void YoutubeInterface::videoDownloadingProcessHandleStdOut(MediaObject *link, QS
     }
 }
 
-void YoutubeInterface::videoDownloadingProcessStdErr()
-{
-    /*
-     * We used to kill the process here when something to stderr
-     * was printed which was not proceeded by a warning.
-     * We now rely on the processes exit code to determine the
-     * outcome of a download action.
-    /*
-    Process *downloadProcess = (Process*) this->sender();
-    QString a = downloadProcess->readAllStandardError();
-    if(a.startsWith("WARNING")) // Video *should* still be able to download, as this is a non critical warning
-    {
-        return;
-    }
-    QFile videoFilePart(this->runningDownloads[downloadProcess->getLink()].fullpath+".part");
-    if(videoFilePart.exists())
-    {
-        videoFilePart.remove();
-    }
-    downloadProcess->kill();
-    emit downloadVideoFailed(downloadProcess->getLink(), a);
-    */
-}
-
-// Process Video Extraction Slots
-void YoutubeInterface::videoExtractionProcessEnd(int exitCode, QProcess::ExitStatus exitStatus, Process *process, bool reportErrors)
-{
-    Process *extractorProcess = process;
-    extractorProcess->deleteLater();
-    if(exitCode != 0) {
-        qDebug() << "Error during extraction for " << extractorProcess->getUrl() << exitCode << exitStatus << reportErrors;
-        emit extractedVideoInformationFailed("Error extracting video:\n\n" + extractorProcess->readAllStandardError(), reportErrors);
-        return;
-    }
-
-    QByteArray stout = extractorProcess->readAllStandardOutput();
-    //QByteArray stderr = extractorProcess->readAllStandardError(); // We used to check for errors here, but scrapped it, as sometimes non critical stuff will be outputted
-    if(stout.size() == 0) // Not quite sure whether this can happen.
-    {
-        qDebug() << "Error during extraction ( stdout empty ) for " << extractorProcess->getUrl() << exitCode << exitStatus << reportErrors;
-        emit extractedVideoInformationFailed("No videos found", reportErrors);
-        return;
-    }
-
-
-    QJsonDocument doc = QJsonDocument::fromJson(stout);
-    if(doc.isNull()) {
-        qDebug() << "Error during extraction ( corrupt json ) for " << extractorProcess->getUrl() << exitCode << exitStatus << reportErrors;
-        emit extractedVideoInformationFailed("Corrupted json returned", reportErrors);
-        return;
-    }
-
-    QJsonObject root = doc.object();
-
-    QJsonArray videos;
-    QString playlistTitle = "";
-
-    if(root.contains("_type")) {
-        QString type = root.value("_type").toString();
-        if(type == "playlist") {
-            videos = root.value("entries").toArray();
-            playlistTitle = root.value("title").toString();
-        } else {
-            qDebug() << "Error during extraction ( unsupported type ) for " << extractorProcess->getUrl() << exitCode << exitStatus << reportErrors;
-            emit extractedVideoInformationFailed("Unsupported type "+type+", please report the error and url where this happened", reportErrors);
-            return;
-        }
-    } else {
-        videos.append(root);
-    }
-
-    int videoCount = videos.count();
-    QList<MediaObject*> videoLinks;
-
-    for(int i = 0; i < videoCount; i++)
-    {
-        QJsonObject video = videos.at(i).toObject();
-        QString title = video["title"].toString();
-        QString url = video["webpage_url"].toString();
-        MediaObject *link = new MediaObject(title, url, "0%");
-        videoLinks.append(link);
-    }
-    qDebug() << "Successfully extracted " << extractorProcess->getUrl()  << exitCode << exitStatus << reportErrors;
-    emit extractedVideoInformation(videoLinks, playlistTitle);
-}
-
-void YoutubeInterface::videoExtractionProcessFinishedReportErrors(int exitCode, QProcess::ExitStatus exitStatus)
-{
-    Process *extractorProcess = (Process*) this->sender();
-    this->videoExtractionProcessEnd(exitCode, exitStatus, extractorProcess, true);
-}
-
-void YoutubeInterface::videoExtractionProcessFinishedNoErrors(int exitCode, QProcess::ExitStatus exitStatus)
-{
-    Process *extractorProcess = (Process*) this->sender();
-    this->videoExtractionProcessEnd(exitCode, exitStatus, extractorProcess, false);
-}
-
-void YoutubeInterface::videoExtractionProcessErrorOccured(Process::ProcessError error)
-{
-    Process *extractorProcess = (Process*) this->sender();
-    qDebug() << "Error during extraction for " << extractorProcess->getUrl() << error;
-    if(error == QProcess::FailedToStart) {
-        extractorProcess->deleteLater();
-        emit extractedVideoInformationFailed("Extraction Process could not be started. Error Code: " + QString::number(error), true);
-    }
-}

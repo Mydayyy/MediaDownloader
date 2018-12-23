@@ -141,63 +141,23 @@ void TableModel::convertToContainer(const QModelIndex &index)
     }
 }
 
-QModelIndex TableModel::getIndexForLink(MediaObject *link, int column, TreeNode *currentNode) const
+QModelIndex TableModel::getIndexForLink(MediaObject *link, int column) const
 {
-    if(currentNode == nullptr)
-    {
-       currentNode = this->rootNode;
-    }
     if(link == nullptr)
     {
         return QModelIndex();
     }
-    if(currentNode->getLink() == link && currentNode != this->rootNode)
-    {
-        QModelIndex index = createIndex(currentNode->row(), column, currentNode);
-        return index;
-    }
-    for(int i = 0; i < currentNode->getChildNodeCount(); i++)
-    {
-        TreeNode *nextNode = currentNode->getChildNodes().value(i);
-        QModelIndex index = this->getIndexForLink(link, column, nextNode);
-        if(index.isValid())
-        {
-            return index;
-        }
-    }
-    return QModelIndex();
+    return this->getIndexForTreeNode(link->getTreeNode(), column);
 }
 
-QModelIndex TableModel::getIndexForTreeNode(TreeNode *treeNode, int column, TreeNode *currentNode) const
+QModelIndex TableModel::getIndexForTreeNode(TreeNode *treeNode, int column) const
 {
-    if(currentNode == nullptr)
-    {
-       currentNode = this->rootNode;
-    }
-    if(treeNode == nullptr)
+    if(treeNode == nullptr || treeNode == this->rootNode)
     {
         return QModelIndex();
     }
-    if(currentNode == treeNode && currentNode != this->rootNode)
-    {
-        QModelIndex index = createIndex(currentNode->row(), column, currentNode);
-        return index;
-    }
-    for(int i = 0; i < currentNode->getChildNodeCount(); i++)
-    {
-        TreeNode *nextNode = currentNode->getChildNodes().value(i);
-        QModelIndex index = this->getIndexForTreeNode(treeNode, column, nextNode);
-        if(index.isValid())
-        {
-            return index;
-        }
-    }
-    return QModelIndex();
-}
-
-MediaObject TableModel::getLinkForIndex(const QModelIndex &index)
-{
-
+    QModelIndex index = createIndex(treeNode->row(), column, treeNode);
+    return index;
 }
 
 QList<TreeNode *> TableModel::convertIndexListToTreeNodeList(const QModelIndexList list)

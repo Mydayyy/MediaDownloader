@@ -18,11 +18,12 @@
 #include <QVBoxLayout>
 #include <QGroupBox>
 #include <QComboBox>
+#include <QInputDialog>
 
 
 #include "mediaobject.h"
 #include "tablemodel.h"
-#include "youtubedownloader.h"
+#include "mediadownloader.h"
 #include "windowsettings.h"
 
 namespace Ui {
@@ -34,13 +35,15 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-private:
     Ui::MainWindow *ui;
+
+private:
+
     TableModel *tableModel;
-    YoutubeDownloader *youtube;
+    MediaDownloader *mediaDownloader;
     QClipboard *clipboard;
     QString lastClipboard;
 
@@ -52,6 +55,7 @@ private:
 public slots:
     void tableViewCustomContextMenu(QPoint pos);
     void actionPlayTriggered(bool checked);
+    void actionStopTriggered(bool checked);
 
 private slots:
     void on_buttonAddTrack_clicked();

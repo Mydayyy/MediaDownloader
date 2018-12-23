@@ -8,42 +8,38 @@
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
 #include <QRegularExpressionMatchIterator>
-#include "myconstants.h"
 #include "tablemodel.h"
 #include "youtubeinterface.h"
 #include "settings.h"
 
-class YoutubeDownloader : public QObject
+class MediaDownloader : public QObject
 {
     Q_OBJECT
 public:
-    explicit YoutubeDownloader(TableModel *tableModel, QObject *parent = 0);
-    ~YoutubeDownloader();
+    explicit MediaDownloader(TableModel *tableModel, QObject *parent = nullptr);
+    ~MediaDownloader();
 
     void addLink(QString url);
     void startDownload();
-    void extractLinkInformation(QString url, bool reportErrors = true);
+    void stopDownload();
+    void extractLinkInformation(QString url, bool reportErrors);
 
-private:
+    void clipboardChanged(QString newText);
+
     TableModel *tableModel;
-    YoutubeInterface *ytd;
-    //int pendingProcesses = 0;
+    YoutubeInterface *youtubeInterface;
+
     int pendingExtractionProcesses = 0;
     int pendingDownloadProcesses = 0;
-    bool isDownloading = false;
     QTimer timerDownloadWatchdog;
-    
-signals:
-    void startedOperating();
-    void stoppedOperating();
 
 public slots:
-    // CLIPBOARD CHANGED
-    void clipboardChanged(QString newText);
+    void downloadWatchdog();
 
     // INFORMATION EXTRACTION
     void extractedLinkInformation(QList<MediaObject*> videos, QString playlistTitle);
     void extractLinkInformationFailed(QString sterr, bool reportError = false);
+    void downloadPostponed();
 
     // DOWNLOADING
     void downloadNext();
@@ -53,7 +49,7 @@ public slots:
     void downloadVideoUpdateProgress(MediaObject *link, QString percentage, QString maxsize, QString speed, QString remaining);
     void downloadVideoDownloadFinished(MediaObject *link, QString maxsize, QString time);
     void downloadVideoFinished(MediaObject *link);
-    void downloadWatchdog();
+    void endDownload(MediaObject *link);
 };
 
 #endif // YOUTUBEDOWNLOADER_H

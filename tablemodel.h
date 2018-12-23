@@ -38,9 +38,8 @@ public:
     void convertToContainer(const QModelIndex &index);
 
     // Helper functions to easily retrieve data
-    QModelIndex getIndexForLink(MediaObject *link, int column, TreeNode *currentNode = nullptr) const;
-    QModelIndex getIndexForTreeNode(TreeNode *treeNode, int column, TreeNode *currentNode = nullptr) const;
-    MediaObject getLinkForIndex(const QModelIndex &index);
+    QModelIndex getIndexForLink(MediaObject *link, int column) const;
+    QModelIndex getIndexForTreeNode(TreeNode *treeNode, int column) const;
     QList<TreeNode *> convertIndexListToTreeNodeList(const QModelIndexList list);
 
     // STUBS

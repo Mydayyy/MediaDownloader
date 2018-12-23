@@ -27,24 +27,23 @@ CONFIG += c++14
 SOURCES += main.cpp\
         mainwindow.cpp \
     tablemodel.cpp \
-    youtubedownloader.cpp \
     youtubeinterface.cpp \
     windowsettings.cpp \
-    process.cpp \
+    myprocess.cpp \
     treenode.cpp \
     mediaobject.cpp \
-    settings.cpp
+    settings.cpp \
+    mediadownloader.cpp
 
 HEADERS  += mainwindow.h \
     tablemodel.h \
-    youtubedownloader.h \
     youtubeinterface.h \
     windowsettings.h \
     treenode.h \
     mediaobject.h \
-    myconstants.h \
     myprocess.h \
-    settings.h
+    settings.h \
+    mediadownloader.h
 
 FORMS    += mainwindow.ui \
     windowsettings.ui

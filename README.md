@@ -1,10 +1,7 @@
 ## Youtube-DL Frontend
 
-https://www.youtube.com/watch?v=9xNf79ybfLk
-
 This is a minimal GUI wrapper around the command line tool
 Youtube-DL.
-
 
 ![MediaDownloader Preview](https://i.imgur.com/7Xy4L3e.png "MediaDownloader Preview")
 

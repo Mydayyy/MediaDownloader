@@ -197,6 +197,7 @@ void MediaDownloader::downloadVideoFinished(MediaObject *link)
 }
 
 void MediaDownloader::endDownload(MediaObject *link) {
+    this->downloadNext();
     if(this->pendingDownloadProcesses == 0)
     {
         this->timerDownloadWatchdog.stop();

@@ -20,7 +20,7 @@
       <item>
        <widget class="QLineEdit" name="inputUrl">
         <property name="text">
-         <string>https://www.youtube.com/watch?v=lbp6PiquMn0</string>
+         <string/>
         </property>
        </widget>
       </item>

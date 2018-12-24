@@ -193,7 +193,12 @@ void MainWindow::on_actionAnalyse_clipboard_for_links_triggered()
 
 void MainWindow::on_actionAbout_triggered()
 {
-    QMessageBox::about(this, "MediaDownloader", "<a href='https://github.com/mydayyy'>https://github.com/mydayyy</a>");
+    QApplication::aboutQt();
+}
+
+void MainWindow::on_actionAbout_2_triggered()
+{
+    QMessageBox::about(this, "MediaDownloader", "<h2>MediaDownloader</h2><p>This is a minimal frontend for the cli of youtube-dl.</p><p>You can find me on Github: <a href='https://github.com/Mydayyy/MediaDownloader'>https://github.com/Mydayyy/MediaDownloader</a></p>");
 }
 
 // INDIVIDUAL SONG SETTINGS STARTING HERE
@@ -264,3 +269,5 @@ void MainWindow::on_audioFormat_currentTextChanged(const QString &arg1)
 {
     setSettingForCurrentObjects("audioFormat", QVariant(arg1));
 }
+
+

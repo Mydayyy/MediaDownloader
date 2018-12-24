@@ -71,6 +71,7 @@ private slots:
     void on_inputSavePath_textEdited(const QString &text);
     void on_extractOnlyAudio_toggled(bool checked);
     void on_audioFormat_currentTextChanged(const QString &arg1);
+    void on_actionAbout_2_triggered();
 };
 
 #endif // MAINWINDOW_H

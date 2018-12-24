@@ -182,6 +182,7 @@ QTreeView:hover {
     <addaction name="actionSettings"/>
     <addaction name="actionClipboard_Watchdog"/>
     <addaction name="actionAbout"/>
+    <addaction name="actionAbout_2"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuOptions"/>
@@ -217,6 +218,11 @@ QTreeView:hover {
    </property>
   </action>
   <action name="actionAbout">
+   <property name="text">
+    <string>About QT</string>
+   </property>
+  </action>
+  <action name="actionAbout_2">
    <property name="text">
     <string>&amp;About</string>
    </property>

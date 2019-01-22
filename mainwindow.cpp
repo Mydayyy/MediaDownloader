@@ -87,7 +87,9 @@ void MainWindow::tableViewCustomContextMenu(QPoint pos)
     QMenu menu(this);
 
     QAction *deleteRow = new QAction("Delete", &menu); // Deletes an entry
-    menu.addAction(deleteRow);
+    if(!link->getData(MediaObject::DATA_IS_STARTED).toBool()) {
+        menu.addAction(deleteRow);
+    }
 
     QAction *retryLink = new QAction("Retry", &menu);
     if(link->getData(MediaObject::DATA_IS_FAILED).toBool())

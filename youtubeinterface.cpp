@@ -134,7 +134,7 @@ void YoutubeInterface::downloadVideo(MediaObject *link, QString containerTitle)
     getFilenameProcess->setLink(link); // We need to access the link later in the slots
     connect(getFilenameProcess, SIGNAL(finished(int)), this, SLOT(extractedFilename(int)));
     qDebug() << "Starting to download filename for" << link->getData(MediaObject::DATA_LINK).toString();
-    getFilenameProcess->start("youtube-dl --no-mtime --get-filename -o \""+destinationPath+"\" " + link->getData(MediaObject::DATA_LINK).toString() + "");
+    getFilenameProcess->start("youtube-dl --no-cache-dir --no-mtime --get-filename -o \""+destinationPath+"\" " + link->getData(MediaObject::DATA_LINK).toString() + "");
 }
 
 void YoutubeInterface::extractedFilename(int exitCode)
@@ -255,7 +255,7 @@ void YoutubeInterface::extractedFilename(int exitCode)
 
     this->createdFilepaths.append(destinationPath);
     qDebug() << "youtube-dl --no-part --no-mtime "+skipOption+onlyAudioOption+" -o \""+destinationPath+"\" " + link->getData(MediaObject::DATA_LINK).toString() + "";
-    downloaderProcess->start("youtube-dl --no-part --no-mtime "+skipOption+onlyAudioOption+" -o \""+destinationPath+"\" " + link->getData(MediaObject::DATA_LINK).toString() + "");
+    downloaderProcess->start("youtube-dl --no-cache-dir --no-part --no-mtime "+skipOption+onlyAudioOption+" -o \""+destinationPath+"\" " + link->getData(MediaObject::DATA_LINK).toString() + "");
     qDebug() << "Starting download process for" << link->getData(MediaObject::DATA_LINK).toString();
     emit downloadVideoStarted(link);
 }

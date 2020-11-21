@@ -118,6 +118,7 @@ bool TableModel::moveRows(const QModelIndex &sourceParent, int sourceRow, int co
         destinationParentNode->insertChildNode(movingRow, finalDestinationRow);
     }
     endMoveRows();
+    return true;
 }
 
 void TableModel::convertToContainer(const QModelIndex &index)
